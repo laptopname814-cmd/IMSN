@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory Server</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <h1>📊 Inventory Data Server</h1>
+      <p>Manage your complete inventory system with automatic backups.</p>
+      <a href="dashboard.html" style="display: inline-block; margin-top: 1rem; padding: 0.9rem 1.4rem; background: white; color: #2d76f9; text-decoration: none; border-radius: 999px; font-weight: bold;">Go to Dashboard →</a>
+    </section>
+
+    <section class="panel">
+      <h2>Save Record</h2>
+      <textarea id="payload" placeholder='Enter JSON payload here, for example {"name":"Item","qty":5}'></textarea>
+      <button id="saveButton">Save to Server</button>
+      <div id="saveStatus" class="status"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Stored Records</h2>
+      <button id="loadRecordsButton">Load Records</button>
+      <pre id="recordsOutput" class="output">No records loaded yet.</pre>
+    </section>
+
+    <section class="panel">
+      <h2>Server Info</h2>
+      <p>Run the Node.js server and then open this page at <strong>http://localhost:5000</strong>.</p>
+      <p><strong>📊 <a href="dashboard.html" style="color: #2d76f9; text-decoration: none;">Open the Dashboard →</a></strong> to access all inventory modules.</p>
+      <p>The server saves all data automatically and backs up the project every 30 minutes.</p>
+    </section>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>

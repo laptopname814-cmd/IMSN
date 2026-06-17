@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f7fb;
+      color: #202a3a;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #2d76f9, #1f59d1);
+      color: white;
+      padding: 2rem;
+      border-radius: 14px;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .header p {
+      opacity: 0.9;
+      font-size: 1.1rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .module-card {
+      background: white;
+      border-radius: 14px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+    }
+
+    .module-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+    }
+
+    .module-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .module-card h3 {
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+      color: #111827;
+    }
+
+    .module-card p {
+      color: #666;
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+    }
+
+    .module-card a {
+      display: inline-block;
+      background: #2d76f9;
+      color: white;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+
+    .module-card a:hover {
+      background: #1f59d1;
+    }
+
+    .info-panel {
+      background: white;
+      border-radius: 14px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      margin-bottom: 2rem;
+    }
+
+    .info-panel h2 {
+      margin-bottom: 1rem;
+      color: #111827;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .status-item {
+      background: #eef4ff;
+      padding: 1rem;
+      border-radius: 10px;
+      border-left: 4px solid #2d76f9;
+    }
+
+    .status-item strong {
+      display: block;
+      color: #111827;
+      margin-bottom: 0.5rem;
+    }
+
+    .status-item span {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1rem;
+      color: #2d76f9;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="/" class="back-link">← Back to Server</a>
+
+    <div class="header">
+      <h1>📊 Inventory Management Dashboard</h1>
+      <p>Access all inventory modules and manage your business data</p>
+    </div>
+
+    <div class="info-panel">
+      <h2>System Status</h2>
+      <div class="status-grid">
+        <div class="status-item">
+          <strong>Server Status</strong>
+          <span id="serverStatus">🟢 Running on Port 5000</span>
+        </div>
+        <div class="status-item">
+          <strong>Data Storage</strong>
+          <span id="dataStoragePath">Loading...</span>
+        </div>
+        <div class="status-item">
+          <strong>Auto-Backup</strong>
+          <span id="backupStatus">⏱️ Every 1 Hour</span>
+          <div style="margin-top:8px;"><button id="backupNow" style="background:#1f59d1;color:#fff;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;">Backup Now</button></div>
+        </div>
+        <div class="status-item">
+          <strong>Total Records</strong>
+          <span id="recordCount">Loading...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- CUSTOMER MANAGEMENT -->
+      <div class="module-card">
+        <div class="module-icon">👥</div>
+        <h3>Customer Management</h3>
+        <p>Add, edit, and manage customer information with contact details and balances.</p>
+        <a href="../assect/customer.html">Open Module →</a>
+      </div>
+
+      <!-- PRODUCT MANAGEMENT -->
+      <div class="module-card">
+        <div class="module-icon">📦</div>
+        <h3>Product Management</h3>
+        <p>Manage product catalog, pricing, units, and stock levels.</p>
+        <a href="../assect/product.html">Open Module →</a>
+      </div>
+
+      <!-- SUPPLIER MANAGEMENT -->
+      <div class="module-card">
+        <div class="module-icon">🏭</div>
+        <h3>Supplier Management</h3>
+        <p>Manage supplier information, contact details, and opening balances.</p>
+        <a href="../assect/supplier.html">Open Module →</a>
+      </div>
+
+      <!-- PURCHASE INVOICE -->
+      <div class="module-card">
+        <div class="module-icon">📥</div>
+        <h3>Purchase Invoice</h3>
+        <p>Create and manage purchase invoices from suppliers.</p>
+        <a href="../assect/purchase invoice.html">Open Module →</a>
+      </div>
+
+      <!-- SALE INVOICE -->
+      <div class="module-card">
+        <div class="module-icon">📤</div>
+        <h3>Sale Invoice</h3>
+        <p>Create and manage sales invoices to customers.</p>
+        <a href="../assect/sale invoice.html">Open Module →</a>
+      </div>
+
+      <!-- PURCHASE VOUCHER -->
+      <div class="module-card">
+        <div class="module-icon">🎫</div>
+        <h3>Purchase Voucher</h3>
+        <p>Record purchase vouchers and payment transactions.</p>
+        <a href="../assect/purchase voucher.html">Open Module →</a>
+      </div>
+
+      <!-- ACCOUNT CATEGORIES -->
+      <div class="module-card">
+        <div class="module-icon">📂</div>
+        <h3>Account Categories</h3>
+        <p>Manage account categories for financial organization.</p>
+        <a href="../assect/account catogaries.html">Open Module →</a>
+      </div>
+
+      <!-- PRODUCTION -->
+      <div class="module-card">
+        <div class="module-icon">🏗️</div>
+        <h3>Production</h3>
+        <p>Manage production orders and raw material issues.</p>
+        <a href="../assect/prodution.html">Open Module →</a>
+      </div>
+
+      <!-- REPORTS -->
+      <div class="module-card">
+        <div class="module-icon">📈</div>
+        <h3>Reports & Analytics</h3>
+        <p>View reports, charts, and analytics of your inventory.</p>
+        <a href="../assect/report.html">Open Module →</a>
+      </div>
+
+      <!-- CHARTS -->
+      <div class="module-card">
+        <div class="module-icon">📊</div>
+        <h3>Charts & Graphs</h3>
+        <p>Visual representation of inventory and financial data.</p>
+        <a href="../assect/chart.html">Open Module →</a>
+      </div>
+    </div>
+
+    <div class="info-panel">
+      <h2>📝 How to Use</h2>
+      <p>1. Click on any module above to access specific inventory management features.</p>
+      <p>2. All data you enter is automatically saved to the server.</p>
+      <p>3. Backups are created automatically every 1 hour. You can also trigger a manual backup using the button above.</p>
+      <p>4. Return to the <a href="/">Server Dashboard</a> to view or export stored records.</p>
+    </div>
+  </main>
+
+  <script>
+    // Fetch server status and record count
+    async function loadDashboard() {
+      try {
+        const response = await fetch('/records');
+        const result = await response.json();
+        if (result.records) {
+          document.getElementById('recordCount').textContent = `📊 ${result.records.length} Records Stored`;
+        }
+        // fetch server status (data file, backup folder)
+        try {
+          const sres = await fetch('/status');
+          if (sres.ok) {
+            const st = await sres.json();
+            if (st.data_file) document.getElementById('dataStoragePath').textContent = st.data_file;
+            if (st.backup_folder) document.getElementById('backupStatus').textContent = `⏱️ Every 1 Hour`;
+            if (typeof st.total_records === 'number') document.getElementById('recordCount').textContent = `📊 ${st.total_records} Records Stored`;
+          }
+        } catch (e) {
+          // ignore
+        }
+      } catch (error) {
+        console.error('Error loading dashboard:', error);
+      }
+    }
+
+    // attach backup button handler
+    document.getElementById('backupNow').addEventListener('click', async () => {
+      const btn = document.getElementById('backupNow');
+      btn.disabled = true;
+      btn.textContent = 'Backing up...';
+      try {
+        const res = await fetch('/backup', { method: 'POST' });
+        const j = await res.json();
+        alert(j.message || 'Backup triggered');
+      } catch (err) {
+        alert('Backup failed');
+      }
+      btn.disabled = false;
+      btn.textContent = 'Backup Now';
+    });
+    
+    loadDashboard();
+  </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "inventory-database-server",
+  "version": "1.0.0",
+  "description": "Complete inventory database server with automatic backups",
+  "main": "run.js",
+  "scripts": {
+    "start": "node run.js"
+  },
+  "dependencies": {
+    "express": "^4.18.3"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
