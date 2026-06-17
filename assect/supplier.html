@@ -1,0 +1,712 @@
+﻿<!-- COMPLETE SUPPLIER MANAGEMENT WITH SEARCH BAR -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Supplier Management</title>
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial;
+}
+
+body{
+  background:#f4f6f9;
+  padding:30px;
+}
+
+.container{
+  max-width:1200px;
+  margin:auto;
+}
+
+.card{
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 2px 5px rgba(0,0,0,0.1);
+  margin-bottom:20px;
+}
+
+h1{
+  margin-bottom:20px;
+  color:#111827;
+}
+
+.form-group{
+  display:grid;
+  grid-template-columns:
+  repeat(auto-fit,minmax(220px,1fr));
+  gap:15px;
+  margin-bottom:15px;
+}
+
+input{
+  padding:12px;
+  border:1px solid #ccc;
+  border-radius:5px;
+  width:100%;
+}
+
+button{
+  padding:10px 15px;
+  border:none;
+  color:white;
+  border-radius:5px;
+  cursor:pointer;
+  margin-right:5px;
+}
+
+.add-btn{
+  background:#2563eb;
+}
+
+.edit-btn{
+  background:green;
+}
+
+.delete-btn{
+  background:red;
+}
+
+.search-btn{
+  background:#9333ea;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+table th,
+table td{
+  border:1px solid #ddd;
+  padding:12px;
+  text-align:left;
+}
+
+table th{
+  background:#111827;
+  color:white;
+}
+
+@media print{
+
+  button,
+  .print-btn,
+  .generate-btn,
+  .pdf-btn,
+  .add-btn,
+  .save-btn,
+  .edit-btn,
+  .delete-btn,
+  .reset-btn,
+  .search-btn,
+  .search-card,
+  .form-group,
+  .no-print,
+  .card:not(#supplierListCard) {
+    display:none !important;
+  }
+
+}
+
+/* SERVER STATUS */
+.server-status {
+  background: #d1d5db;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 5px;
+  display: inline-block;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.company-print-header {
+  display: none;
+  margin-bottom: 15px;
+  padding: 10px 0;
+  border: none;
+  background: transparent;
+}
+
+.company-print-header .company-print-header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.company-print-header .header-part {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.company-print-header .header-part.left {
+  text-align: left;
+  flex: 0 0 auto;
+}
+
+.company-print-header .header-part.center {
+  text-align: center;
+  flex: 1;
+}
+
+.company-print-header .header-part.right {
+  text-align: right;
+  flex: 0 0 auto;
+}
+
+.company-print-header img {
+  max-height: 50px;
+  max-width: 100px;
+  display: block;
+}
+
+.company-print-header .company-name {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.company-print-header .company-address {
+  font-size: 13px;
+  margin: 0;
+}
+
+@media print {
+  .company-print-header {
+    display: block !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: #fff !important;
+    padding: 10px 15px !important;
+    border-bottom: 1px solid #ddd !important;
+    z-index: 9999 !important;
+  }
+  .company-print-header .company-print-header-inner {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 20px !important;
+  }
+  .company-print-header .header-part.left,
+  .company-print-header .header-part.center,
+  .company-print-header .header-part.right {
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+  .company-print-header .header-part.left {
+    text-align: left !important;
+  }
+  .company-print-header .company-print-header-inner .header-part.center {
+    text-align: center !important;
+    font-size: 16px !important;
+    font-weight: bold !important;
+  }
+  .company-print-header .header-part.right {
+    text-align: right !important;
+    font-size: 13px !important;
+  }
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .container {
+    padding-top: 120px !important;
+  }
+  .card:not(#supplierListCard) {
+    display: none !important;
+  }
+  .table-wrapper, table {
+    display: table !important;
+  }
+  th:last-child,
+  td:last-child,
+  .edit-btn,
+  .delete-btn {
+    display: none !important;
+  }
+  tbody {
+    display: table-row-group !important;
+  }
+}
+
+</style>
+
+
+</head>
+
+<body>
+
+<div class="company-print-header" id="companyPrintHeader"></div>
+
+<div class="container">
+
+  <!-- <div class="server-status" id="serverConnectionStatus">ðŸ”„ Checking Server...</div> -->
+
+  <!-- SUPPLIER FORM -->
+
+  <div class="card">
+
+    <h1>Supplier Add Form</h1>
+
+    <div class="form-group">
+
+      <input
+        type="text"
+        id="supplierName"
+        placeholder="Supplier Name"
+      >
+
+      <input
+        type="text"
+        id="supplierAddress"
+        placeholder="Address"
+      >
+
+      <input
+        type="number"
+        id="openingBalance"
+        placeholder="Opening Balance"
+      >
+
+      <input
+        type="text"
+        id="phoneNo"
+        placeholder="Phone Number"
+      >
+
+    </div>
+
+    <button
+      class="add-btn"
+      onclick="saveSupplier()"
+    >
+      Save Supplier
+    </button>
+
+  </div>
+
+  <!-- SEARCH BAR -->
+
+  <div class="card search-card">
+
+    <h1>Search Supplier</h1>
+
+    <div class="form-group">
+
+      <input
+        type="text"
+        id="searchName"
+        placeholder="Search Name"
+        onkeyup="searchSupplier()"
+      >
+
+      <input
+        type="text"
+        id="searchAddress"
+        placeholder="Search Address"
+        onkeyup="searchSupplier()"
+      >
+
+      <input
+        type="text"
+        id="searchPhone"
+        placeholder="Search Phone"
+        onkeyup="searchSupplier()"
+      >
+
+      <input
+        type="number"
+        id="searchOpening"
+        placeholder="Search Opening Balance"
+        onkeyup="searchSupplier()"
+      >
+
+    </div>
+
+    <button
+      class="search-btn"
+      onclick="searchSupplier()"
+    >
+      Search
+    </button>
+
+    <button class="search-btn" onclick="window.print()">Print</button>
+
+  </div>
+
+  <!-- SUPPLIER LIST -->
+
+  <div class="card" id="supplierListCard">
+
+    <h1>Supplier List</h1>
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>ID</th>
+          <th>Name</th>
+          <th>Address</th>
+          <th>Opening</th>
+          <th>Phone</th>
+          <th>Action</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody id="supplierTable">
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+<script>
+
+let suppliers =
+  JSON.parse(
+    localStorage.getItem("suppliers")
+  ) || [];
+
+let editIndex = -1;
+
+
+// SAVE LOCAL STORAGE
+
+function saveSuppliers(){
+
+  localStorage.setItem(
+    "suppliers",
+    JSON.stringify(suppliers)
+  );
+
+}
+
+
+// DISPLAY SUPPLIERS
+
+function displaySuppliers(data = suppliers){
+
+  const table =
+    document.getElementById("supplierTable");
+
+  table.innerHTML = "";
+
+  data.forEach((supplier,index)=>{
+
+    table.innerHTML += `
+
+      <tr>
+
+        <td>${index + 1}</td>
+
+        <td>${supplier.name}</td>
+
+        <td>${supplier.address}</td>
+
+        <td>${supplier.opening}</td>
+
+        <td>${supplier.phone}</td>
+
+        <td>
+
+          <button
+            class="edit-btn"
+            onclick="editSupplier(${index})"
+          >
+            Edit
+          </button>
+
+          <button
+            class="delete-btn"
+            onclick="deleteSupplier(${index})"
+          >
+            Delete
+          </button>
+
+        </td>
+
+      </tr>
+
+    `;
+  });
+
+}
+
+
+// SAVE SUPPLIER
+
+function saveSupplier(){
+
+  const name =
+    document.getElementById("supplierName")
+    .value;
+
+  const address =
+    document.getElementById("supplierAddress")
+    .value;
+
+  const opening =
+    document.getElementById("openingBalance")
+    .value;
+
+  const phone =
+    document.getElementById("phoneNo")
+    .value;
+
+  if(
+    name === "" ||
+    address === "" ||
+    opening === "" ||
+    phone === ""
+  ){
+
+    alert("Please fill all fields");
+
+    return;
+  }
+
+  const supplierData = {
+
+    name:name,
+
+    address:address,
+
+    opening:opening,
+
+    phone:phone
+
+  };
+
+  if(editIndex === -1){
+
+    suppliers.push(supplierData);
+
+  }else{
+
+    suppliers[editIndex] =
+      supplierData;
+
+    editIndex = -1;
+
+  }
+
+  saveSuppliers();
+
+  // Auto-sync to server
+  DBConnector.saveData(supplierData, 'supplier');
+
+  displaySuppliers();
+
+  clearForm();
+
+}
+
+
+// EDIT SUPPLIER
+
+function editSupplier(index){
+
+  const supplier =
+    suppliers[index];
+
+  document.getElementById("supplierName")
+  .value = supplier.name;
+
+  document.getElementById("supplierAddress")
+  .value = supplier.address;
+
+  document.getElementById("openingBalance")
+  .value = supplier.opening;
+
+  document.getElementById("phoneNo")
+  .value = supplier.phone;
+
+  editIndex = index;
+
+}
+
+
+// DELETE SUPPLIER
+
+function deleteSupplier(index){
+
+  if(confirm("Delete this supplier?")){
+
+    suppliers.splice(index,1);
+
+    saveSuppliers();
+
+    displaySuppliers();
+
+  }
+
+}
+
+
+// SEARCH FUNCTION
+
+function searchSupplier(){
+
+  let searchName =
+    document.getElementById("searchName")
+    .value
+    .toLowerCase();
+
+  let searchAddress =
+    document.getElementById("searchAddress")
+    .value
+    .toLowerCase();
+
+  let searchPhone =
+    document.getElementById("searchPhone")
+    .value
+    .toLowerCase();
+
+  let searchOpening =
+    document.getElementById("searchOpening")
+    .value;
+
+  let filteredData =
+    suppliers.filter(supplier=>{
+
+      let matchName =
+        supplier.name
+        .toLowerCase()
+        .includes(searchName);
+
+      let matchAddress =
+        supplier.address
+        .toLowerCase()
+        .includes(searchAddress);
+
+      let matchPhone =
+        supplier.phone
+        .toLowerCase()
+        .includes(searchPhone);
+
+      let matchOpening = true;
+
+      if(searchOpening !== ""){
+
+        matchOpening =
+          supplier.opening
+          .includes(searchOpening);
+
+      }
+
+      return (
+
+        matchName &&
+        matchAddress &&
+        matchPhone &&
+        matchOpening
+
+      );
+
+    });
+
+  displaySuppliers(filteredData);
+
+}
+
+
+// CLEAR FORM
+
+function clearForm(){
+
+  document.getElementById("supplierName")
+  .value = "";
+
+  document.getElementById("supplierAddress")
+  .value = "";
+
+  document.getElementById("openingBalance")
+  .value = "";
+
+  document.getElementById("phoneNo")
+  .value = "";
+
+}
+
+
+// LOAD DATA
+
+displaySuppliers();
+
+
+
+// Add print button to page
+
+
+
+
+// Add print button to page
+if (typeof addPrintButtonToPage !== 'undefined') addPrintButtonToPage('supplier');
+
+</script>
+<script>
+/* COMPANY PRINT HEADER */
+function getCompanyInfoForPrint() {
+  try {
+    return JSON.parse(localStorage.getItem('erp_company_info') || 'null') || {};
+  } catch (error) {
+    return {};
+  }
+}
+
+function getCompanyPrintHeaderHtml(title) {
+  const info = getCompanyInfoForPrint();
+  const logo = info.logoDataUrl ? `<img src="${info.logoDataUrl}" alt="Company Logo">` : '';
+  const name = info.companyName ? `<div class="company-name">${info.companyName}</div>` : '';
+  const address = info.address ? `<div class="company-address">${info.address}</div>` : '';
+  return `\n    <div class="company-print-header-inner">\n      <div class="header-part left">${logo}</div>\n      <div class="header-part center">${name}</div>\n      <div class="header-part right">${address}</div>\n    </div>\n  `;
+}
+
+function renderCompanyPrintHeader() {
+  const header = document.getElementById('companyPrintHeader');
+  if (header) {
+    header.innerHTML = getCompanyPrintHeaderHtml();
+    header.style.display = 'none';
+  }
+}
+
+renderCompanyPrintHeader();
+</script>
+
+<!-- DATABASE SERVER CONNECTOR -->
+<script src="http://localhost:5000/database-connector.js">
+
+// Add print button to page
+
+
+
+
+// Add print button to page
+if (typeof addPrintButtonToPage !== 'undefined') addPrintButtonToPage('supplier');
+
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,2851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventory Management System</title>
+<link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <style>
+    
+    
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#f3f4f7;
+}
+
+
+
+/* ===== LOGIN ===== */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: var(--bg);
+}
+
+.login-bg {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.login-grid {
+  position: absolute;
+  inset: -50%;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.4;
+  animation: gridDrift 20s linear infinite;
+}
+
+@keyframes gridDrift {
+  from { transform: translate(0,0); }
+  to { transform: translate(48px, 48px); }
+}
+
+.login-box {
+  position: relative;
+  z-index: 10;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 0 80px rgba(240,180,41,0.08), var(--shadow);
+  animation: fadeUp 0.4s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.login-brand {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.brand-icon { font-size: 2.5rem; display: block; margin-bottom: 0.5rem; margin-left: 300px; }
+
+.login-brand-logo {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  margin-bottom: 0.5rem;
+  border-radius: 6px;
+  background: white;
+  border: 1px solid #d1d5db;
+  margin-left: 125px;
+}
+
+.login-brand h1 {
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+
+.login-brand h1 span { color: var(--accent); }
+
+.login-brand p {
+  font-size: 0.8rem;
+  color: var(--text3);
+  margin-top: 0.25rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.login-form { display: flex; flex-direction: column; gap: 1rem; }
+
+.login-error {
+  background: rgba(239,68,68,0.15);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: #fca5a5;
+  padding: 0.6rem 0.9rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  display: none;
+}
+
+.login-error.show { display: block; }
+
+.login-hint {
+  text-align: center;
+  margin-top: 1.25rem;
+  font-size: 0.75rem;
+  color: var(--text3);
+  font-family: var(--font-mono);
+}
+
+/* ===== APP LAYOUT ===== */
+.hidden { display: none !important; }
+.app-page { display: flex; flex-direction: column; height: 100vh; }
+.app-page.hidden { display: none !important; }
+.login-page.hidden { display: none !important; }
+
+.topbar {
+  height: var(--topbar-h);
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.25rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+.topbar-left { display: flex; align-items: center; gap: 0.75rem; }
+
+.topbar-right { 
+  display: flex; 
+  align-items: center; 
+  gap: 1rem; 
+}
+
+.user-badge {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+  background: #f0f0f0;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.topbar{
+background:#ffffff;
+padding:15px 20px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+.logo{
+display:flex;
+align-items:center;
+gap:10px;
+font-size:20px;
+font-weight:bold;
+}
+
+.logo img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  border-radius: 6px;
+  background: white;
+  border: 1px solid #d1d5db;
+}
+
+.logo span {
+  display: block;
+  line-height: 1.1;
+}
+
+.menu{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+}
+
+.menu button,
+.sidebar button,
+.form-grid button,
+.panel button{
+background:#1565c0;
+color:white;
+border:none;
+padding:12px 18px;
+border-radius:8px;
+cursor:pointer;
+}
+
+.layout{
+display:flex;
+min-height:calc(100vh - 70px);
+}
+
+.sidebar{
+    width:260px;
+    background:#1e293b;
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    overflow-y:auto;
+    max-height:calc(100vh - 70px);
+    position:sticky;
+    top:70px;
+  }
+
+  .sidebar a {
+    text-decoration:none;
+  }
+
+  .sidebar button{
+    width:100%;
+    text-align:left;
+    background:#334155;
+  }
+
+  .content{
+    flex:1;
+    padding:20px;
+  }
+
+  .chart-switch {
+    display:inline-flex;
+    gap:0;
+    margin-bottom:14px;
+    background:#f3f4f7;
+    border:1px solid #d1d5db;
+    border-radius:10px;
+    overflow:hidden;
+    justify-content:flex-start;
+    margin-left:0;
+  }
+
+  .chart-switch button {
+    background:transparent;
+    border:0;
+    padding:10px 16px;
+    cursor:pointer;
+    color:#374151;
+    font-weight:600;
+  }
+
+  .chart-switch button:first-child {
+    border-right:1px solid #e6e9ee;
+  }
+
+  .chart-switch button.active {
+    background:#fff;
+    color:#0b63d6;
+  }
+
+  .chart-area,
+  .list-grid {
+    background:#ffffff;
+    border:1px solid #d1d5db;
+    border-radius:12px;
+    padding:16px;
+  }
+
+  .list-grid {
+    display:grid;
+    gap:12px;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    margin-top:12px;
+  }
+
+  .list-tab-switch {
+    display:flex;
+    gap:10px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+
+  .list-tab-switch button {
+    background:#f3f4f7;
+    border:1px solid #d1d5db;
+    color:#1f2937;
+    padding:10px 16px;
+    border-radius:10px;
+    cursor:pointer;
+  }
+
+  .list-tab-switch button.active {
+    background:#2563eb;
+    border-color:#1d4ed8;
+    color:#fff;
+  }
+
+  .list-tab-panel {
+    display:block;
+  }
+
+  .list-tab-panel.hidden {
+    display:none;
+  }
+
+  .chart-list-status {
+    margin-top:8px;
+    font-size:0.95rem;
+    color:#374151;
+  }
+
+  .chart-card {
+    padding:14px;
+    border-radius:12px;
+    background:#f8fafc;
+    min-height:220px;
+  }
+
+  .chart-card h3 {
+    margin-bottom:10px;
+    font-size:1rem;
+    color:#111827;
+  }
+
+  .chart-card ul {
+    list-style:none;
+    padding:0;
+  }
+
+  .chart-card li {
+    margin-bottom:8px;
+    padding:8px 10px;
+    border-radius:8px;
+    background:#ffffff;
+    border:1px solid #e2e8f0;
+  }
+.section{
+display:none;
+}
+
+.section.active{
+display:block;
+}
+
+.cards{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:20px;
+margin:20px 0;
+}
+
+.card{
+background:#ff9800;
+padding:25px;
+border-radius:12px;
+color:white;
+}
+
+.card.green{
+background:#2e7d32;
+}
+
+.card.blue{
+background:#1565c0;
+}
+
+.card.red{
+background:#c62828;
+}
+
+.dashboard-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
+}
+
+.panel{
+background:white;
+padding:20px;
+border-radius:12px;
+box-shadow:0 2px 10px rgba(0,0,0,0.1);
+margin-bottom:20px;
+}
+
+.panel h3 {
+margin: 0 0 15px 0;
+font-size: 1.1rem;
+color: #333;
+}
+
+.panel h4 {
+margin: 20px 0 15px 0;
+font-size: 1rem;
+color: #555;
+}
+
+.panel p {
+margin: 8px 0;
+color: #666;
+}
+
+.password-change {
+background: #f9f9f9;
+padding: 20px;
+border-radius: 8px;
+margin-top: 15px;
+border: 1px solid #e0e0e0;
+}
+
+.form-msg {
+padding: 12px;
+border-radius: 6px;
+text-align: center;
+font-weight: 600;
+}
+
+.form-msg.error {
+background: #fee;
+color: #c62828;
+border: 1px solid #f08080;
+}
+
+.form-msg.success {
+background: #efe;
+color: #2e7d32;
+border: 1px solid #90ee90;
+}
+
+.form-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+gap:15px;
+margin:20px 0;
+}
+
+.company-profile-card {
+  background: #f8fafc;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 18px;
+  margin-top: 15px;
+}
+
+.company-profile-card h4 {
+  margin: 0 0 12px 0;
+}
+
+.company-profile-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.company-profile-row span {
+  flex: 1 1 180px;
+}
+
+.company-logo-preview {
+  width: 100%;
+  max-width: 180px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  margin-top: 10px;
+}
+
+input{
+padding:12px;
+border:1px solid #ccc;
+border-radius:8px;
+}
+
+table{
+width:100%;
+background:white;
+border-collapse:collapse;
+border-radius:12px;
+overflow:hidden;
+margin-top:20px;
+}
+
+th,td{
+padding:14px;
+border-bottom:1px solid #ddd;
+text-align:left;
+}
+
+th{
+background:#1565c0;
+color:white;
+}
+
+.delete-btn{
+background:#c62828;
+color:white;
+border:none;
+padding:8px 12px;
+border-radius:6px;
+cursor:pointer;
+}
+
+.btn-primary {
+background: #1565c0;
+color: white;
+border: none;
+padding: 12px 24px;
+border-radius: 8px;
+cursor: pointer;
+font-weight: 600;
+transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+background: #0d47a1;
+}
+
+.btn-primary:disabled {
+background: #1565c0;
+color: white;
+border: none;
+opacity: 1;
+cursor: not-allowed;
+}
+
+#loginButton.btn-primary:disabled {
+background: #1565c0;
+color: white;
+opacity: 1;
+}
+
+.btn-logout{
+  color: white;
+      padding: 10px 16px;
+      background-color: #ed0a0a;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+}
+
+.btn-logout:hover {
+background: #f8f0f3;
+color: #000000;
+border: 2px solid #ed0a0a;
+}
+@media(max-width:900px){
+.layout{
+flex-direction:column;
+}
+
+.sidebar{
+width:100%;
+position: fixed;
+left: 0;
+top: 70px;
+height: calc(100vh - 70px);
+transform: translateX(-100%);
+transition: transform 0.3s ease;
+z-index: 99;
+height:100vh;
+overflow-y:scroll;
+overflow-x: auto;
+
+}
+
+
+
+.sidebar.open {
+transform: translateX(0);
+}
+}
+
+.sidebar-toggle {
+background: none;
+border: none;
+font-size: 24px;
+cursor: pointer;
+color: #333;
+padding: 8px;
+display: none;
+overflow-y:scroll;
+overflow-x: auto;
+}
+
+@media(max-width:900px) {
+.sidebar-toggle {
+display: block;
+
+}
+}
+
+#si{
+      margin-bottom: -1500px;
+}
+
+
+
+  </style>
+
+
+<!-- login -->
+
+
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="login-page">
+  <div class="login-bg">
+    <div class="login-grid"></div>
+  </div>
+  <div class="login-box">
+    <div class="login-brand">
+      <span class="brand-icon" id="loginBrandIcon"></span>
+      <img id="loginBrandLogo" class="login-brand-logo" src="" alt="Company Logo" style="display:none;">
+      <h1 id="loginBrandName">MyBook <span id="loginBrandERP"></span></h1>
+      <p>Business Management System</p>
+    </div>
+    <div class="login-form">
+      <div class="field">
+        <label>User ID</label>
+        <input type="text" id="loginUser" placeholder="Enter user ID" autocomplete="username" list="loginUserList" oninput="refreshLoginButtonState()">
+        <datalist id="loginUserList"></datalist>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password" oninput="refreshLoginButtonState()">
+      </div>
+      <div id="loginError" class="login-error"></div>
+      <button id="loginButton" class="btn-primary full" onclick="doLogin()">Sign In →</button>
+    </div>
+     <p class="login-hint">Default: admin / admin123</p> 
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="appPage" class="app-page hidden">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="logo">
+        <img id="topbarLogo" src="" alt="Company Logo" style="display:none;">
+        <span id="topbarCompanyName">MyBook ERP</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span class="user-badge" id="userBadgeTop">Admin</span>
+      <!-- <button class="btn-primary" id="backupNowBtn" onclick="triggerBackup()">Backup Now</button> -->
+      <button class="btn-primary" id="exportBackupBtn" onclick="exportBackupFile()">Export Backup</button>
+      <button class="btn-primary" id="importBackupBtn" onclick="triggerBackupUpload()">Import Backup</button>
+      <button class="btn-logout" onclick="doLogout()">Logout</button>
+      <input type="file" id="backupUploadInput" accept=".bak,.json" style="display:none" onchange="handleBackupFileUpload(event)">
+    </div>
+  </div>
+
+  <div class="layout">
+
+  <div id="si" class="sidebar">
+    <button onclick="showSection('dashboard')"> Dashboard</button>
+    <button data-file="credit customer voucher.html" onclick="window.location.href='assect/credit customer voucher.html'">Credit Customer Vouher</button>
+    <button data-file="credit purchase voucher.html" onclick="window.location.href='assect/credit purchase voucher.html'">Credit purchase Vouher</button>
+    <button data-file="customer payment voucher.html" onclick="window.location.href='assect/customer payment voucher.html'">Customer Payment Vouher</button>
+    <button data-file="customer.html" onclick="window.location.href='assect/customer.html'">Customer</button>
+    <button data-file="invoice raw material issue.html" onclick="window.location.href='assect/invoice raw material issue.html'">Invoice Raw Material Issue</button>
+    <button data-file="product.html" onclick="window.location.href='assect/product.html'">Product</button>
+    <button data-file="prodution.html" onclick="window.location.href='assect/prodution.html'">Production</button>
+    <button data-file="purchase invoice.html" onclick="window.location.href='assect/purchase invoice.html'">Purchase Invoice</button>
+    <button data-file="purchase ledgher.html" onclick="window.location.href='assect/purchase ledgher.html'">Purchase Ledger</button>
+    <button data-file="purchase voucher.html" onclick="window.location.href='assect/purchase voucher.html'">Purchase Voucher</button>
+    <button data-file="report.html" onclick="window.location.href='assect/report.html'">Report</button>
+    <button data-file="sale invoice.html" onclick="window.location.href='assect/sale invoice.html'">Sale Invoice</button>
+    <button data-file="sale ledgher.html" onclick="window.location.href='assect/sale ledgher.html'">Sale Ledger</button>
+    <button data-file="supplier.html" onclick="window.location.href='assect/supplier.html'">Supplier</button>
+    <button data-file="account catogaries.html" onclick="window.location.href='assect/account categaries.html'">Account Categaries</button>
+    <button onclick="showSection('settings')"> Settings</button>
+    <!-- <a href="">
+      <button></button>
+    </a> -->
+    <!-- <button onclick="showSection('dashboard')"> Dashboard</button>
+    <button onclick="showSection('products')"> Product Management</button>
+    <button onclick="showSection('sales')"> Sales Invoice</button>
+    <button onclick="showSection('purchase')"> Purchase Invoice</button>
+    <button onclick="showSection('customers')"> Customers</button>
+    <button onclick="showSection('reports')"> Reports</button>
+    <button onclick="showSection('stock')"> Stock</button>
+     -->
+  </div>
+
+  <div class="content">
+
+    <section id="dashboard" class="section active">
+      <h1>Business Dashboard</h1>
+
+      <div class="cards">
+        <div class="card blue" data-file="sale invoice.html" onclick="openAssetFile('sale invoice.html')" style="cursor:pointer;">
+          <h2 id="cardSales">0</h2>
+          <p>Sales</p>
+        </div>
+
+        <div class="card green" data-file="customer payment voucher.html" onclick="openAssetFile('customer payment voucher.html')" style="cursor:pointer;">
+          <h2 id="cardReceive">0</h2>
+          <p>Receive</p>
+        </div>
+
+        <div class="card" data-file="purchase invoice.html" onclick="openAssetFile('purchase invoice.html')" style="cursor:pointer;">
+          <h2 id="cardPurchase">0</h2>
+          <p>Purchase</p>
+        </div>
+
+        <div class="card red" data-file="purchase voucher.html" onclick="openAssetFile('purchase voucher.html')" style="cursor:pointer;">
+          <h2 id="cardPaid">0</h2>
+          <p>Paid</p>
+        </div>
+
+        <div class="card" data-file="report.html" onclick="openAssetFile('report.html')" style="cursor:pointer;">
+          <h2 id="cardOptions">0</h2>
+          <p>Options</p>
+        </div>
+      </div>
+
+       <div class="dashboard-tabs">
+          <div class="dashboard-tab-switch" style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+            <button id="dashboardChartBtn" class="active" style="width: 450px; height: 40px; border-radius: 10px; font-size: 15px; background-color: rgb(2, 2, 2); color: white; border: none;">Chart</button>
+            <button id="dashboardListBtn" style="width: 450px; height: 40px; border-radius: 10px; font-size: 15px;  background-color: rgb(2, 2, 2); color: white; border: none;">Lists</button>
+          </div>
+          <div id="dashboardStatus" style="font-size:0.95rem; color:#374151; margin-bottom:8px;"></div>
+
+      <div class="panel">
+        <h3>Sales Comparison</h3>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+          <input id="salesPersonInput" list="personList" placeholder="Type customer name or select" />
+          <datalist id="personList"></datalist>
+          <button onclick="addComparePerson()">Add</button>
+          <button onclick="clearComparePersons()">Clear</button>
+        </div>
+        <div id="selectedPersons" style="margin-bottom:8px;"></div>
+
+       
+
+          <div id="dashboardChartPane">
+            <canvas id="compareChart" style="max-height:300px; width:100%;"></canvas>
+          </div>
+
+          <div id="dashboardListPane" class="hidden">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div class="chart-card">
+                <h4>Remaining Stock</h4>
+                <table style="width:100%; border-collapse:collapse;">
+                  <thead style="background:#f1f5f9;"><tr><th style="padding:8px; border:1px solid #e5e7eb;">SR</th><th style="padding:8px; border:1px solid #e5e7eb;">Name</th><th style="padding:8px; border:1px solid #e5e7eb; text-align:center;">Mini Stock</th></tr></thead>
+                  <tbody id="dash_topStockList"></tbody>
+                </table>
+              </div>
+              <div class="chart-card">
+                <h4>Outstandings</h4>
+                <table style="width:100%; border-collapse:collapse;">
+                  <thead style="background:#f1f5f9;"><tr><th style="padding:8px; border:1px solid #e5e7eb;">SR</th><th style="padding:8px; border:1px solid #e5e7eb;">Name</th><th style="padding:8px; border:1px solid #e5e7eb; text-align:right;">Balance</th></tr></thead>
+                  <tbody id="dash_topOutstandingList"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div style="margin-top:12px;" class="chart-card">
+              <h4>Top Sales</h4>
+              <table style="width:100%; border-collapse:collapse;">
+                <thead style="background:#f1f5f9;"><tr><th style="padding:8px; border:1px solid #e5e7eb;">SR</th><th style="padding:8px; border:1px solid #e5e7eb;">Name</th><th style="padding:8px; border:1px solid #e5e7eb; text-align:right;">Total Sales</th></tr></thead>
+                <tbody id="dash_topSellingCustomerList"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- <div class="dashboard-grid">
+        <div class="panel">
+          <h2>Quick Actions</h2>
+          <button onclick="showSection('products')">Add Product</button>
+          <button onclick="showSection('sales')">Create Sale Invoice</button>
+          <button onclick="showSection('purchase')">Create Purchase Invoice</button>
+        </div> -->
+
+        <!-- <div class="panel">
+          <h2>Recent Activity</h2>
+          <ul id="activityList"></ul>
+        </div>
+      </div> -->
+    </section>
+
+    <section id="products" class="section">
+      <h1>Product Management</h1>
+
+      <div class="form-grid">
+        <input type="text" id="productName" placeholder="Product Name">
+        <input type="number" id="productPrice" placeholder="Price">
+        <input type="number" id="productQty" placeholder="Quantity">
+        <input type="number" id="productMiniStock" placeholder="Minimum Stock Level">
+        <button onclick="addProduct()">Add Product</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Mini Stock</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="productTable"></tbody>
+      </table>
+    </section>
+
+    <section id="sales" class="section">
+      <h1>Sales Invoice</h1>
+
+      <div class="form-grid">
+        <input type="text" id="saleCustomer" placeholder="Customer Name">
+        <input type="number" id="saleAmount" placeholder="Amount">
+        <button onclick="createSale()">Create Invoice</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Invoice ID</th>
+            <th>Customer</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="salesTable"></tbody>
+      </table>
+    </section>
+
+    <section id="purchase" class="section">
+      <h1>Purchase Invoice</h1>
+
+      <div class="form-grid">
+        <input type="text" id="purchaseVendor" placeholder="Vendor Name">
+        <input type="number" id="purchaseAmount" placeholder="Amount">
+        <button onclick="createPurchase()">Create Purchase</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Vendor</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody id="purchaseTable"></tbody>
+      </table>
+    </section>
+
+    <section id="customers" class="section">
+      <h1>Customer Management</h1>
+
+      <div class="form-grid">
+        <input type="text" id="customerName" placeholder="Customer Name">
+        <input type="text" id="customerPhone" placeholder="Phone Number">
+        <input type="text" id="customerReference" placeholder="Sub Customer (Optional)">
+        <button onclick="addCustomer()">Add Customer</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Sub Customer</th>
+          </tr>
+        </thead>
+        <tbody id="customerTable"></tbody>
+      </table>
+    </section>
+
+    <section id="reports" class="section">
+      <h1>Reports</h1>
+
+      <div class="cards">
+        <div class="card">
+          <h2 id="reportSales">$0</h2>
+          <p>Total Revenue</p>
+        </div>
+
+        <div class="card blue">
+          <h2 id="reportProducts">0</h2>
+          <p>Total Products</p>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:16px; display:flex; flex-wrap:wrap; gap:10px;">
+        <button data-file="credit customer voucher.html" onclick="openAssetFile('credit customer voucher.html')">Open Credit Customer Voucher</button>
+        <button data-file="credit purchase voucher.html" onclick="openAssetFile('credit purchase voucher.html')">Open Credit Purchase Voucher</button>
+        <button data-file="purchase ledgher.html" onclick="openAssetFile('purchase ledgher.html')">Open Account Ledger</button>
+        <button data-file="report1.html" onclick="openAssetFile('report1.html')">Open Report 1</button>
+      </div>
+    </section>
+
+    <section id="charts" class="section">
+      <h1>Charts & Top Lists</h1>
+      <div class="chart-switch">
+        <button id="chartViewBtn" class="active" onclick="setChartView('chart')">Chart View</button>
+        <button id="listViewBtn" onclick="setChartView('list')">Top Lists View</button>
+      </div>
+      <div id="chartListStatus" class="chart-list-status"></div>
+
+      <div id="chartArea" class="chart-area">
+        <canvas id="mainListChart" style="width:100%; height:320px;"></canvas>
+      </div>
+
+      <div id="chartLists" class="hidden">
+        <div class="list-tab-switch">
+          <button id="stockTabBtn" class="active" onclick="setListTab('stock')">Remaining Stock</button>
+          <button id="outstandingTabBtn" onclick="setListTab('outstanding')">Outstandings</button>
+          <button id="salesTabBtn" onclick="setListTab('sales')">Top Sales</button>
+        </div>
+
+        <div class="list-tab-panel active" id="stockListPane">
+          <div class="chart-card">
+            <h3>Remaining Stock List</h3>
+            <table style="width:100%; margin-top:10px; border-collapse:collapse;">
+              <thead style="background:#e8eef7;">
+                <tr>
+                  <th style="padding:8px; border:1px solid #ddd; text-align:left;">SR No</th>
+                  <th style="padding:8px; border:1px solid #ddd; text-align:left;">Name</th>
+                  <th style="padding:8px; border:1px solid #ddd; text-align:center;">Mini Stock</th>
+                </tr>
+              </thead>
+              <tbody id="topStockList" style="font-size:0.9rem;"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="list-tab-panel hidden" id="outstandingListPane">
+          <div class="chart-card">
+            <h3>Outstandings List</h3>
+            <table style="width:100%; margin-top:10px; border-collapse:collapse;">
+              <thead style="background:#e8eef7;">
+                <tr>
+                  <th style="padding:8px; border:1px solid #ddd; text-align:left;">SR No</th>
+                  <th style="padding:8px; border:1px solid #ddd; text-align:left;">Name</th>
+                  <th style="padding:8px; border:1px solid #ddd; text-align:right;">Balance</th>
+                </tr>
+              </thead>
+              <tbody id="topOutstandingList" style="font-size:0.9rem;"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="list-tab-panel hidden" id="salesListPane">
+          <div class="chart-card">
+            <h3>Top Sales List</h3>
+            <table style="width:100%; margin-top:10px; border-collapse:collapse;">
+              <thead style="background:#e8eef7;">
+                <tr>
+                  <th style="padding:8px; border:1px solid #ddd; text-align:left;">SR No</th>
+                  <th style="padding:8px; border:1px solid #ddd; text-align:left;">Name</th>
+                  <th style="padding:8px; border:1px solid #ddd; text-align:right;">Total Sales</th>
+                </tr>
+              </thead>
+              <tbody id="topSellingCustomerList" style="font-size:0.9rem;"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="stock" class="section">
+      <h1>Stock Inventory</h1>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Stock Quantity</th>
+          </tr>
+        </thead>
+        <tbody id="stockTable"></tbody>
+      </table>
+    </section>
+
+    <section id="settings" class="section">
+      <h1>Settings</h1>
+
+      <div id="companyInfoPanel" class="panel">
+        <h3>Company Information</h3>
+        <div class="form-grid">
+          <input type="text" id="companyName" placeholder="Company Name">
+          <input type="text" id="ownerName" placeholder="Owner Name">
+          <input type="text" id="mobileNumber" placeholder="Mobile Number">
+          <input type="text" id="phoneNumber" placeholder="Phone Number">
+          <input type="date" id="companyDate" placeholder="Date">
+          <input type="text" id="companyAddress" placeholder="Address">
+          <input type="text" id="companyGreetings" placeholder="Greetings">
+          <input type="text" id="companyNotes" placeholder="Note">
+          <div style="display:flex;flex-direction:column; gap:8px;">
+            <label style="font-weight:700;">Logo / Image</label>
+            <input type="file" id="companyLogoInput" accept="image/*">
+            <img id="companyLogoPreview" class="company-logo-preview" src="" alt="Logo preview" style="display:none;">
+          </div>
+        </div>
+
+        <div class="form-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));">
+          <button onclick="saveCompanyInfo()">Add</button>
+          <button onclick="loadCompanyInfoForEdit()">Edit</button>
+          <button onclick="updateCompanyInfo()">Update</button>
+          <button onclick="clearCompanyInfo()">Clear</button>
+        </div>
+
+        <div id="companySettingsMsg" class="form-msg" style="display:none;"></div>
+
+        <div class="company-profile-card" id="companyProfilePreview">
+          <h4>Saved Company Profile</h4>
+          <div class="company-profile-row">
+            <span><strong>Name:</strong> <span id="previewCompanyName">-</span></span>
+            <span><strong>Owner:</strong> <span id="previewOwnerName">-</span></span>
+          </div>
+          <div class="company-profile-row">
+            <span><strong>Mobile:</strong> <span id="previewMobileNumber">-</span></span>
+            <span><strong>Phone:</strong> <span id="previewPhoneNumber">-</span></span>
+          </div>
+          <div class="company-profile-row">
+            <span><strong>Address:</strong> <span id="previewCompanyAddress">-</span></span>
+            <span><strong>Date:</strong> <span id="previewCompanyDate">-</span></span>
+          </div>
+          <div class="company-profile-row">
+            <span><strong>Greetings:</strong> <span id="previewCompanyGreetings">-</span></span>
+            <span><strong>Note:</strong> <span id="previewCompanyNotes">-</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Account Settings</h3>
+        <p>User: <strong id="settingsUser">Admin</strong></p>
+        
+        <div class="password-change">
+          <h4>Change Password</h4>
+          <div class="form-grid">
+            <input type="password" id="currentPass" placeholder="Current Password">
+            <input type="password" id="newPass" placeholder="New Password">
+            <input type="password" id="confirmPass" placeholder="Confirm Password">
+            <button onclick="changePassword()">Update Password</button>
+          </div>
+          <div id="passMsg" style="margin-top: 10px; padding: 10px; border-radius: 6px; display: none;"></div>
+        </div>
+      </div>
+
+      <div id="settingsUserRightsPanel" class="panel">
+        <h3>Users & Rights</h3>
+        <div style="margin-bottom:12px;">
+          <form id="addUserForm" onsubmit="event.preventDefault(); addUser();">
+            <div class="form-grid">
+              <input type="text" id="newUserId" placeholder="User ID">
+              <input type="text" id="newUserName" placeholder="Full Name">
+              <input type="password" id="newUserPass" placeholder="Password">
+              <select id="newUserRights">
+                <option value="admin">Admin</option>
+                <option value="manager">Manager</option>
+                <option value="user">User</option>
+              </select>
+              <button type="submit">Add User</button>
+            </div>
+          </form>
+        </div>
+
+        <div>
+          <h4>Existing Users</h4>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Password</th>
+                <th>Rights</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="usersTable"></tbody>
+          </table>
+        </div>
+
+        <div id="rightsEditor" style="display:none; margin-top:12px; background:#fff; padding:12px; border-radius:8px;">
+          <h4>Edit File Rights for <span id="rightsEditorUser"></span></h4>
+          <div id="rightsList" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:8px; max-height:200px; overflow:auto; margin-top:8px;"></div>
+          <div class="form-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:8px; margin-top:8px;">
+          </div>
+          <div style="margin-top:8px;">
+            <button onclick="saveUserRights()">Save Rights</button>
+            <button onclick="closeRightsEditor()">Cancel</button>
+          </div>
+        </div>
+
+      </div>
+<!-- 
+      <div class="panel">
+        <button onclick="clearSystem()">Clear All Data</button>
+      </div> -->
+    </section>
+
+  </div>
+
+</div>
+
+</div>
+
+<script >
+
+  // =============================
+// MYBOOK ERP - FULL WORKING SCRIPT
+// =============================
+
+// ---------- STORAGE ----------
+const STORAGE_KEYS = {
+  users: 'erp_users',
+  currentUser: 'erp_current_user',
+  products: 'erp_products',
+  sales: 'erp_sales',
+  purchases: 'erp_purchases',
+  customers: 'erp_customers',
+  activity: 'erp_activity'
+};
+
+// List of asset files available for rights assignment
+const ASSET_FILES = [
+  'account catogaries.html',
+  'sale ledgher.html',
+  'credit customer voucher.html',
+  'credit purchase voucher.html',
+  'customer payment voucher.html',
+  'customer.html',
+  'invoice raw material issue.html',
+  'product.html',
+  'prodution.html',
+  'purchase invoice.html',
+  'purchase ledgher.html',
+  'purchase voucher.html',
+  'report.html',
+  // 'report1.html',
+  'sale invoice.html',
+  'supplier.html'
+];
+
+// ---------- DEFAULT USER ----------
+function initializeSystem() {
+  const storedUsers = getData(STORAGE_KEYS.users);
+  const adminIndex = storedUsers.findIndex(u => u.id === 'admin');
+
+  if (adminIndex === -1) {
+    const defaultUsers = [
+      {
+        id: 'admin',
+        password: 'admin123',
+        name: 'Administrator',
+        rights: 'admin',
+        rightsFiles: ASSET_FILES.slice(),
+        expiryStart: '',
+        expiryEnd: ''
+      }
+    ];
+    localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(defaultUsers));
+  } else {
+    storedUsers[adminIndex].password = 'admin123';
+    storedUsers[adminIndex].rights = 'admin';
+    storedUsers[adminIndex].rightsFiles = storedUsers[adminIndex].rightsFiles || ASSET_FILES.slice();
+    saveData(STORAGE_KEYS.users, storedUsers);
+  }
+
+  if (!localStorage.getItem(STORAGE_KEYS.products)) {
+    localStorage.setItem(STORAGE_KEYS.products, JSON.stringify([]));
+  }
+
+  if (!localStorage.getItem(STORAGE_KEYS.sales)) {
+    localStorage.setItem(STORAGE_KEYS.sales, JSON.stringify([]));
+  }
+
+  if (!localStorage.getItem(STORAGE_KEYS.purchases)) {
+    localStorage.setItem(STORAGE_KEYS.purchases, JSON.stringify([]));
+  }
+
+  if (!localStorage.getItem(STORAGE_KEYS.customers)) {
+    localStorage.setItem(STORAGE_KEYS.customers, JSON.stringify([]));
+  }
+
+  if (!localStorage.getItem(STORAGE_KEYS.activity)) {
+    localStorage.setItem(STORAGE_KEYS.activity, JSON.stringify([]));
+  }
+
+  // Prepare login / company branding on initial load
+  populateLoginUserList();
+  renderCompanyInfoPreview();
+}
+
+// ---------- HELPERS ----------
+function getData(key) {
+  return JSON.parse(localStorage.getItem(key)) || [];
+}
+
+function saveData(key, data) {
+  localStorage.setItem(key, JSON.stringify(data));
+}
+
+function populateLoginUserList() {
+  const users = getData(STORAGE_KEYS.users);
+  const list = document.getElementById('loginUserList');
+  if (!list) return;
+  list.innerHTML = '';
+  users.forEach(user => {
+    const option = document.createElement('option');
+    option.value = user.id;
+    list.appendChild(option);
+  });
+}
+
+function generateId(prefix = 'ID') {
+  return `${prefix}-${Date.now()}`;
+}
+
+function addActivity(message) {
+  const activities = getData(STORAGE_KEYS.activity);
+
+  activities.unshift({
+    text: message,
+    time: new Date().toLocaleString()
+  });
+
+  if (activities.length > 10) {
+    activities.splice(10);
+  }
+
+  saveData(STORAGE_KEYS.activity, activities);
+  renderActivities();
+}
+
+function showMessage(elementId, message, type = 'success') {
+  const element = document.getElementById(elementId);
+
+  element.style.display = 'block';
+  element.className = `form-msg ${type}`;
+  element.textContent = message;
+
+  setTimeout(() => {
+    element.style.display = 'none';
+  }, 3000);
+}
+
+// ---------- LOGIN SYSTEM ----------
+function parseDateValue(value) {
+  if (!value) return null;
+  const normalized = value.includes('T') ? value : `${value}T00:00:00`;
+  const date = new Date(normalized);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function isExpiryEnforced() {
+  return localStorage.getItem('erp_expiry_enabled') !== 'false';
+}
+
+function isUserAccessAllowed(user) {
+  if (!user) return false;
+  if (!isExpiryEnforced()) return true;
+  const now = new Date();
+  const start = parseDateValue(user.expiryStart);
+  const end = parseDateValue(user.expiryEnd);
+  if (start && now < start) return false;
+  if (end && now > end) return false;
+  return true;
+}
+
+function getUserAccessError(user) {
+  if (!user) return 'Invalid login credentials';
+  const now = new Date();
+  const start = parseDateValue(user.expiryStart);
+  const end = parseDateValue(user.expiryEnd);
+  if (start && now < start) return `Account not active until ${new Date(start).toLocaleString()}`;
+  if (end && now > end) return `Account expired on ${new Date(end).toLocaleString()}`;
+  return 'Account access is restricted.';
+}
+
+function setLoginButtonEnabled(enabled) {
+  const loginButton = document.getElementById('loginButton');
+  if (loginButton) loginButton.disabled = !enabled;
+}
+
+function refreshLoginButtonState() {
+  const userId = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value.trim();
+  const loginButton = document.getElementById('loginButton');
+  const errorBox = document.getElementById('loginError');
+  const users = getData(STORAGE_KEYS.users);
+  const user = users.find(u => u.id === userId && u.password === password);
+
+  if (user && isExpiryEnforced() && !isUserAccessAllowed(user)) {
+    setLoginButtonEnabled(false);
+    if (errorBox) {
+      errorBox.textContent = '';
+      errorBox.classList.remove('show');
+    }
+    return;
+  }
+
+  setLoginButtonEnabled(true);
+  if (loginButton) loginButton.disabled = false;
+}
+
+function doLogin() {
+  const userId = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value.trim();
+  const errorBox = document.getElementById('loginError');
+
+  if (!userId || !password) {
+    errorBox.textContent = 'Please enter User ID and Password';
+    errorBox.classList.add('show');
+    return;
+  }
+
+  const users = getData(STORAGE_KEYS.users);
+
+  const user = users.find(
+    u => u.id === userId && u.password === password
+  );
+
+  if (!user) {
+    errorBox.textContent = 'Invalid login credentials';
+    errorBox.classList.add('show');
+    return;
+  }
+
+  if (isExpiryEnforced() && !isUserAccessAllowed(user)) {
+    refreshLoginButtonState();
+    return;
+  }
+
+  localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(user));
+
+  document.getElementById('loginPage').classList.add('hidden');
+  document.getElementById('appPage').classList.remove('hidden');
+
+  document.getElementById('userBadgeTop').textContent = ` ${user.name}`;
+  document.getElementById('settingsUser').textContent = user.name;
+
+  errorBox.classList.remove('show');
+
+  addActivity(`${user.name} logged into the system`);
+
+  loadAllData();
+  applyUserFileRights();
+}
+
+function doLogout() {
+  localStorage.removeItem(STORAGE_KEYS.currentUser);
+
+  document.getElementById('appPage').classList.add('hidden');
+  document.getElementById('loginPage').classList.remove('hidden');
+
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  setLoginButtonEnabled(true);
+  refreshLoginButtonState();
+}
+
+function checkLogin() {
+  const currentUser = JSON.parse(localStorage.getItem(STORAGE_KEYS.currentUser));
+
+  if (currentUser && (!isExpiryEnforced() || isUserAccessAllowed(currentUser))) {
+    document.getElementById('loginPage').classList.add('hidden');
+    document.getElementById('appPage').classList.remove('hidden');
+
+    document.getElementById('userBadgeTop').textContent = ` ${currentUser.name}`;
+    document.getElementById('settingsUser').textContent = currentUser.name;
+
+    loadAllData();
+    applyUserFileRights();
+    return;
+  }
+
+  if (currentUser && isExpiryEnforced()) {
+    doLogout();
+  }
+}
+
+function enforceCurrentUserExpiry() {
+  const currentUser = JSON.parse(localStorage.getItem(STORAGE_KEYS.currentUser));
+  if (currentUser && isExpiryEnforced() && !isUserAccessAllowed(currentUser)) {
+    doLogout();
+  }
+}
+
+setInterval(enforceCurrentUserExpiry, 30000);
+
+// ---------- SECTION NAVIGATION ----------
+function showSection(sectionId) {
+  document.querySelectorAll('.section').forEach(section => {
+    section.classList.remove('active');
+  });
+
+  document.getElementById(sectionId).classList.add('active');
+
+  const sidebar = document.querySelector('.sidebar');
+  sidebar.classList.remove('open');
+}
+
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open');
+}
+
+// ---------- PRODUCTS ----------
+function addProduct() {
+  const name = document.getElementById('productName').value.trim();
+  const price = parseFloat(document.getElementById('productPrice').value);
+  const qty = parseInt(document.getElementById('productQty').value);
+  const miniStock = parseInt(document.getElementById('productMiniStock').value) || 0;
+
+  if (!name || isNaN(price) || isNaN(qty)) {
+    alert('Please fill all product fields');
+    return;
+  }
+
+  const products = getData(STORAGE_KEYS.products);
+
+  const product = {
+    id: generateId('PRD'),
+    name,
+    price,
+    qty,
+    miniStock
+  };
+
+  products.push(product);
+
+  saveData(STORAGE_KEYS.products, products);
+
+  addActivity(`Product added: ${name}`);
+
+  document.getElementById('productName').value = '';
+  document.getElementById('productPrice').value = '';
+  document.getElementById('productQty').value = '';
+  document.getElementById('productMiniStock').value = '';
+
+  renderProducts();
+  renderTopLists();
+  updateDashboard();
+  renderStock();
+}
+
+function deleteProduct(id) {
+  let products = getData(STORAGE_KEYS.products);
+
+  const product = products.find(p => p.id === id);
+
+  products = products.filter(product => product.id !== id);
+
+  saveData(STORAGE_KEYS.products, products);
+
+  addActivity(`Product deleted: ${product?.name || 'Unknown'}`);
+
+  renderProducts();
+  updateDashboard();
+  renderStock();
+}
+
+function renderProducts() {
+  const products = getData(STORAGE_KEYS.products);
+  const table = document.getElementById('productTable');
+  if (!table) return;
+  table.innerHTML = '';
+  products.forEach(product => {
+    table.innerHTML += `
+      <tr>
+        <td>${product.id || '-'}</td>
+        <td>${product.name || '-'}</td>
+        <td>$${Number(product.price || 0).toFixed(2)}</td>
+        <td>${product.qty || 0}</td>
+        <td>${product.miniStock || 0}</td>
+        <td>
+          <button class="delete-btn" onclick="deleteProduct('${product.id}')">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function createSale() {
+  const customer = document.getElementById('saleCustomer').value.trim();
+  const amount = parseFloat(document.getElementById('saleAmount').value);
+  if (!customer || isNaN(amount)) {
+    alert('Please fill all sales fields');
+    return;
+  }
+  const sales = JSON.parse(localStorage.getItem('salesInvoices') || '[]');
+  const sale = {
+    id: generateId('INV'),
+    customer,
+    amount,
+    status: 'Paid',
+    date: new Date().toLocaleDateString()
+  };
+  sales.push(sale);
+  localStorage.setItem('salesInvoices', JSON.stringify(sales));
+  addActivity(`Sales invoice created for ${customer}`);
+  document.getElementById('saleCustomer').value = '';
+  document.getElementById('saleAmount').value = '';
+  renderSales();
+  renderTopLists();
+  updateDashboard();
+}
+
+function renderSales() {
+  const sales = JSON.parse(localStorage.getItem('salesInvoices') || '[]');
+  const table = document.getElementById('salesTable');
+  if (!table) return;
+  table.innerHTML = '';
+  sales.forEach(sale => {
+    table.innerHTML += `
+      <tr>
+        <td>${sale.id || 'INV-' + Date.now()}</td>
+        <td>${sale.customer || '-'}</td>
+        <td>$${Number(sale.amount || 0).toFixed(2)}</td>
+        <td>${sale.status || 'Pending'}</td>
+      </tr>
+    `;
+  });
+}
+
+function createPurchase() {
+  const vendor = document.getElementById('purchaseVendor').value.trim();
+  const amount = parseFloat(document.getElementById('purchaseAmount').value);
+  if (!vendor || isNaN(amount)) {
+    alert('Please fill all purchase fields');
+    return;
+  }
+  const purchases = JSON.parse(localStorage.getItem('purchaseInvoices') || '[]');
+  const purchase = {
+    id: generateId('PUR'),
+    vendor,
+    amount,
+    date: new Date().toLocaleDateString()
+  };
+  purchases.push(purchase);
+  localStorage.setItem('purchaseInvoices', JSON.stringify(purchases));
+  addActivity(`Purchase created for vendor ${vendor}`);
+  document.getElementById('purchaseVendor').value = '';
+  document.getElementById('purchaseAmount').value = '';
+  renderPurchases();
+  renderTopLists();
+  updateDashboard();
+}
+
+function renderPurchases() {
+  const purchases = JSON.parse(localStorage.getItem('purchaseInvoices') || '[]');
+  const table = document.getElementById('purchaseTable');
+  if (!table) return;
+  table.innerHTML = '';
+  purchases.forEach(purchase => {
+    table.innerHTML += `
+      <tr>
+        <td>${purchase.id || 'PUR-' + Date.now()}</td>
+        <td>${purchase.vendor || '-'}</td>
+        <td>$${Number(purchase.amount || 0).toFixed(2)}</td>
+      </tr>
+    `;
+  });
+}
+
+// ---------- CUSTOMERS ----------
+function addCustomer() {
+  const name = document.getElementById('customerName').value.trim();
+  const phone = document.getElementById('customerPhone').value.trim();
+  const reference = document.getElementById('customerReference').value.trim();
+
+  if (!name || !phone) {
+    alert('Please fill customer details');
+    return;
+  }
+
+  const customers = getData(STORAGE_KEYS.customers);
+
+  const customer = {
+    id: generateId('CUS'),
+    name,
+    phone,
+    reference
+  };
+
+  customers.push(customer);
+
+  saveData(STORAGE_KEYS.customers, customers);
+
+  addActivity(`Customer added: ${name}`);
+
+  document.getElementById('customerName').value = '';
+  document.getElementById('customerPhone').value = '';
+  document.getElementById('customerReference').value = '';
+
+  renderCustomers();
+  renderTopLists();
+  updateDashboard();
+}
+
+function renderCustomers() {
+  const customers = getData(STORAGE_KEYS.customers);
+  const table = document.getElementById('customerTable');
+  if (!table) return;
+  table.innerHTML = '';
+  customers.forEach(customer => {
+    table.innerHTML += `
+      <tr>
+        <td>${customer.id || 'CUST-' + Date.now()}</td>
+        <td>${customer.name || '-'}</td>
+        <td>${customer.phone || '-'}</td>
+        <td>${customer.reference || '-'}</td>
+      </tr>
+    `;
+  });
+}
+
+// ---------- STOCK ----------
+function renderStock() {
+  const products = getData(STORAGE_KEYS.products);
+  const table = document.getElementById('stockTable');
+  if (!table) return;
+  table.innerHTML = '';
+  products.forEach(product => {
+    table.innerHTML += `
+      <tr>
+        <td>${product.name || '-'}</td>
+        <td>${product.qty || 0}</td>
+      </tr>
+    `;
+  });
+}
+
+// ---------- REPORTS ----------
+function updateReports() {
+  const salesInvoices = JSON.parse(localStorage.getItem('salesInvoices') || '[]');
+  const products = getData(STORAGE_KEYS.products);
+
+  const totalRevenue = salesInvoices.reduce((sum, sale) => sum + Number(sale.amount || 0), 0);
+
+  document.getElementById('reportSales').textContent = `$${Number(totalRevenue).toFixed(2)}`;
+  document.getElementById('reportProducts').textContent = products.length;
+}
+
+// ---------- DASHBOARD ----------
+
+// ---------- ACTIVITY ----------
+function renderActivities() {
+  const activities = getData(STORAGE_KEYS.activity);
+  const activityList = document.getElementById('activityList');
+  if (!activityList) return;
+  activityList.innerHTML = '';
+  activities.forEach(activity => {
+    activityList.innerHTML += `
+      <li style="margin-bottom:10px; list-style:none; background:#f5f5f5; padding:10px; border-radius:8px;">
+        <strong>${activity.text}</strong><br>
+        <small>${activity.time}</small>
+      </li>
+    `;
+  });
+}
+
+// ---------- PASSWORD CHANGE ----------
+function changePassword() {
+  const currentPass = document.getElementById('currentPass').value;
+  const newPass = document.getElementById('newPass').value;
+  const confirmPass = document.getElementById('confirmPass').value;
+
+  const currentUser = JSON.parse(localStorage.getItem(STORAGE_KEYS.currentUser));
+
+  if (!currentPass || !newPass || !confirmPass) {
+    showPasswordMessage('Please fill all password fields', 'error');
+    return;
+  }
+
+  if (currentPass !== currentUser.password) {
+    showPasswordMessage('Current password is incorrect', 'error');
+    return;
+  }
+
+  if (newPass.length < 4) {
+    showPasswordMessage('Password must be at least 4 characters', 'error');
+    return;
+  }
+
+  if (newPass !== confirmPass) {
+    showPasswordMessage('Passwords do not match', 'error');
+    return;
+  }
+
+  const users = getData(STORAGE_KEYS.users);
+
+  const userIndex = users.findIndex(user => user.id === currentUser.id);
+
+  users[userIndex].password = newPass;
+  currentUser.password = newPass;
+
+  saveData(STORAGE_KEYS.users, users);
+  localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(currentUser));
+
+  document.getElementById('currentPass').value = '';
+  document.getElementById('newPass').value = '';
+  document.getElementById('confirmPass').value = '';
+
+  addActivity('Password updated successfully');
+
+  showPasswordMessage('Password updated successfully', 'success');
+}
+
+function showPasswordMessage(message, type) {
+  const passMsg = document.getElementById('passMsg');
+
+  passMsg.style.display = 'block';
+  passMsg.className = `form-msg ${type}`;
+  passMsg.textContent = message;
+
+  setTimeout(() => {
+    passMsg.style.display = 'none';
+  }, 3000);
+}
+
+// ---------- SERVER / BACKUP / USERS INTEGRATION ----------
+async function triggerBackup() {
+  if (!['http:', 'https:'].includes(window.location.protocol)) {
+    addActivity('Backup not available in local file mode');
+    alert('Backup is only available when the app is served via HTTP/HTTPS.');
+    return;
+  }
+
+  try {
+    const res = await fetch('/backup', { method: 'POST' });
+    if (!res.ok) throw new Error('Backup failed');
+    const data = await res.json();
+    addActivity('Manual backup triggered');
+    alert('Backup started: ' + (data?.status || 'ok'));
+  } catch (error) {
+    console.warn('Backup endpoint failed (offline mode)', error);
+    addActivity('Backup triggered (offline)');
+    alert('Backup queued (system offline)');
+  }
+}
+
+function getBackupData() {
+  const backupKeys = [
+    ...Object.values(STORAGE_KEYS),
+    'salesInvoices',
+    'saleLedger',
+    'customers',
+    'products',
+    'productionData',
+    'suppliers',
+    'purchaseLedger',
+    'reports',
+    'creditCustomerVouchers',
+    'creditPurchaseVouchers',
+    'customerPaymentVouchers',
+    'invoiceRawMaterialIssue',
+    'accountCategariesData',
+    'purchaseVouchersData',
+    'purchasePaymentVouchers',
+    'rawMaterialItems',
+    'issueInfo',
+    'account_first_categories',
+    'account_second_categories',
+    'purchaseInvoices',
+    'erp_company_info'
+  ];
+
+  
+
+
+  const backup = {};
+  backupKeys.forEach(key => {
+    const item = localStorage.getItem(key);
+    if (item !== null) {
+      try {
+        backup[key] = JSON.parse(item);
+      } catch (error) {
+        backup[key] = item;
+      }
+    }
+  });
+
+  return {
+    meta: {
+      createdAt: new Date().toISOString(),
+      fileType: 'mybook-erp-backup',
+      version: '1.0'
+    },
+    storage: backup
+  };
+}
+
+// Fetch asset files (HTML) and attach their contents to the backup when possible
+async function gatherBackupDataWithAssets(assetPaths = []) {
+  const base = getBackupData();
+  base.files = base.files || {};
+
+  for (const p of assetPaths) {
+    try {
+      const res = await fetch(p);
+      if (res.ok) {
+        const text = await res.text();
+        base.files[p] = { ok: true, content: text };
+      } else {
+        base.files[p] = { ok: false, error: `HTTP ${res.status}` };
+      }
+    } catch (err) {
+      base.files[p] = { ok: false, error: err.message || 'fetch failed' };
+    }
+  }
+
+  return base;
+}
+
+async function saveBackupFileToLocation(filename, content) {
+  if (!window.showSaveFilePicker) {
+    return false;
+  }
+
+  const options = {
+    types: [
+      {
+        description: 'Inventory backup file',
+        accept: {
+          'application/json': ['.bak', '.json']
+        }
+      }
+    ],
+    suggestedName: filename
+  };
+
+  const handle = await window.showSaveFilePicker(options);
+  const writable = await handle.createWritable();
+  await writable.write(content);
+  await writable.close();
+  addActivity('Backup file exported to chosen location');
+  alert('Backup exported successfully.');
+  return true;
+}
+
+function downloadBackupFile(backupDataOptional) {
+  const backupData = backupDataOptional || getBackupData();
+  const fileContent = JSON.stringify(backupData, null, 2);
+  const blob = new Blob([fileContent], { type: 'application/json' });
+  const filename = `mybook-erp-backup-${new Date().toISOString().replace(/[:.]/g, '-')}.bak`;
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  URL.revokeObjectURL(link.href);
+  link.remove();
+  addActivity('Backup file exported');
+}
+
+async function exportBackupFile() {
+  // include all asset files (from ASSET_FILES) found under the `assect/` folder
+  const assets = ASSET_FILES.map(f => 'assect/' + f);
+
+  const backupData = await gatherBackupDataWithAssets(assets);
+  const fileContent = JSON.stringify(backupData, null, 2);
+  const filename = `mybook-erp-backup-${new Date().toISOString().replace(/[:.]/g, '-')}.bak`;
+
+  if (window.showSaveFilePicker) {
+    try {
+      const success = await saveBackupFileToLocation(filename, fileContent);
+      if (success) {
+        return;
+      }
+    } catch (error) {
+      console.warn('Save file picker failed, falling back to download:', error);
+    }
+  }
+
+  if (!window.File || !window.Blob || !window.URL) {
+    alert('Your browser does not support file download.');
+    return;
+  }
+
+  // Use the gathered backup (including asset fetch results) for download fallback
+  downloadBackupFile(backupData);
+}
+
+function triggerBackupUpload() {
+  const input = document.getElementById('backupUploadInput');
+  if (input) {
+    input.value = '';
+    input.click();
+  }
+}
+
+function handleBackupFileUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const content = reader.result;
+      const parsed = JSON.parse(content);
+      const payload = parsed.storage || parsed;
+      if (!payload || typeof payload !== 'object') {
+        throw new Error('Invalid backup file format');
+      }
+
+      Object.keys(payload).forEach(key => {
+        if (key === 'meta') return;
+        localStorage.setItem(key, JSON.stringify(payload[key]));
+      });
+
+      addActivity('Backup file imported');
+      alert('Backup imported successfully. Reload the page to apply restored data.');
+    } catch (error) {
+      console.error('Backup import failed', error);
+      alert('Unable to import backup file. Please select a valid .bak file.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+async function fetchUsersFromServer() {
+  if (!['http:', 'https:'].includes(window.location.protocol)) {
+    renderUsers();
+    return;
+  }
+
+  try {
+    const res = await fetch('/users');
+    if (!res.ok) throw new Error('No users endpoint');
+    const json = await res.json();
+    if (Array.isArray(json.users)) {
+      saveData(STORAGE_KEYS.users, json.users);
+      renderUsers();
+    }
+  } catch (error) {
+    // fallback to local users
+    renderUsers();
+  }
+}
+
+function renderUsers() {
+  const users = getData(STORAGE_KEYS.users);
+  const tbody = document.getElementById('usersTable');
+  const currentUser = JSON.parse(localStorage.getItem(STORAGE_KEYS.currentUser) || 'null');
+  const adminMode = currentUser && currentUser.rights === 'admin';
+  tbody.innerHTML = '';
+  populateLoginUserList();
+  users.forEach(user => {
+    const rightsCount = (user.rightsFiles && user.rightsFiles.length) || 0;
+    const rightsLabel = user.rights === 'admin'
+      ? 'Admin (full access)'
+      : rightsCount > 0
+          ? `${rightsCount} files`
+          : (user.rights || 'user');
+    const isAdminUser = user.id === 'admin';
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${user.id}</td>
+        <td>${user.name || '-'}</td>
+        <td>${user.password || '-'}</td>
+        <td>${rightsLabel}</td>
+        <td>
+          <button onclick="editUserPassword('${user.id}')">Change Pass</button>
+          ${adminMode && !isAdminUser ? `<button onclick="editUserRights('${user.id}')">Edit Rights</button>` : ''}
+          ${adminMode && !isAdminUser ? `<button onclick="deleteUser('${user.id}')">Delete</button>` : ''}
+          ${adminMode && !isAdminUser ? `<button onclick="loginAsUser('${user.id}')">Login as</button>` : ''}
+        </td>
+      </tr>
+    `;
+  });
+}
+
+const COMPANY_INFO_KEY = 'erp_company_info';
+
+function getCompanyInfo() {
+  try {
+    return JSON.parse(localStorage.getItem(COMPANY_INFO_KEY) || 'null');
+  } catch (error) {
+    return null;
+  }
+}
+
+function showCompanySettingsMessage(message, type = 'success') {
+  const el = document.getElementById('companySettingsMsg');
+  if (!el) return;
+  el.style.display = 'block';
+  el.className = `form-msg ${type}`;
+  el.textContent = message;
+  setTimeout(() => {
+    el.style.display = 'none';
+  }, 3000);
+}
+
+function renderCompanyInfoPreview() {
+  const info = getCompanyInfo() || {};
+  document.getElementById('previewCompanyName').textContent = info.companyName || '-';
+  document.getElementById('previewOwnerName').textContent = info.ownerName || '-';
+  document.getElementById('previewMobileNumber').textContent = info.mobileNumber || '-';
+  document.getElementById('previewPhoneNumber').textContent = info.phoneNumber || '-';
+  document.getElementById('previewCompanyAddress').textContent = info.address || '-';
+  document.getElementById('previewCompanyDate').textContent = info.date || '-';
+  document.getElementById('previewCompanyGreetings').textContent = info.greetings || '-';
+  document.getElementById('previewCompanyNotes').textContent = info.notes || '-';
+  const logoPreview = document.getElementById('companyLogoPreview');
+  const topbarLogo = document.getElementById('topbarLogo');
+  const topbarCompanyName = document.getElementById('topbarCompanyName');
+  const loginBrandLogo = document.getElementById('loginBrandLogo');
+  const loginBrandIcon = document.getElementById('loginBrandIcon');
+  const loginBrandName = document.getElementById('loginBrandName');
+
+  if (info.logoDataUrl) {
+    logoPreview.src = info.logoDataUrl;
+    logoPreview.style.display = 'block';
+    if (topbarLogo) {
+      topbarLogo.src = info.logoDataUrl;
+      topbarLogo.style.display = 'block';
+    }
+    // Update login page logo
+    if (loginBrandLogo) {
+      loginBrandLogo.src = info.logoDataUrl;
+      loginBrandLogo.style.display = 'block';
+    }
+    // Hide emoji icon when logo is present
+    if (loginBrandIcon) {
+      loginBrandIcon.style.display = 'none';
+    }
+  } else {
+    logoPreview.src = '';
+    logoPreview.style.display = 'none';
+    if (topbarLogo) {
+      topbarLogo.src = '';
+      topbarLogo.style.display = 'none';
+    }
+    // Hide login page logo when no logo
+    if (loginBrandLogo) {
+      loginBrandLogo.src = '';
+      loginBrandLogo.style.display = 'none';
+    }
+    // Show emoji icon when no logo
+    if (loginBrandIcon) {
+      loginBrandIcon.style.display = 'block';
+    }
+  }
+
+  if (topbarCompanyName) {
+    topbarCompanyName.textContent = info.companyName || 'MyBook ERP';
+  }
+
+  // Update login page company name
+  if (loginBrandName) {
+    const companyName = info.companyName || 'MyBook';
+    const erpText = document.getElementById('loginBrandERP');
+    loginBrandName.innerHTML = companyName + ' <span id="loginBrandERP">ERP</span>';
+  }
+}
+
+function loadCompanyInfoForEdit() {
+  const currentUser = JSON.parse(localStorage.getItem(STORAGE_KEYS.currentUser) || 'null');
+  if (!currentUser || currentUser.id !== 'admin') {
+    showCompanySettingsMessage('Only admin can access company information.', 'error');
+    return;
+  }
+
+  const info = getCompanyInfo();
+  if (!info) {
+    showCompanySettingsMessage('No saved company info found. Please add company details first.', 'error');
+    return;
+  }
+  document.getElementById('companyName').value = info.companyName || '';
+  document.getElementById('ownerName').value = info.ownerName || '';
+  document.getElementById('mobileNumber').value = info.mobileNumber || '';
+  document.getElementById('phoneNumber').value = info.phoneNumber || '';
+  document.getElementById('companyDate').value = info.date || '';
+  document.getElementById('companyAddress').value = info.address || '';
+  document.getElementById('companyGreetings').value = info.greetings || '';
+  document.getElementById('companyNotes').value = info.notes || '';
+  renderCompanyInfoPreview();
+  showCompanySettingsMessage('Company info loaded for editing.', 'success');
+}
+
+function saveCompanyInfo(isUpdate = false) {
+  const currentUser = JSON.parse(localStorage.getItem(STORAGE_KEYS.currentUser) || 'null');
+  if (!currentUser || currentUser.id !== 'admin') {
+    showCompanySettingsMessage('Only admin can access company information.', 'error');
+    return;
+  }
+
+  const companyName = document.getElementById('companyName').value.trim();
+  const ownerName = document.getElementById('ownerName').value.trim();
+  const mobileNumber = document.getElementById('mobileNumber').value.trim();
+  const phoneNumber = document.getElementById('phoneNumber').value.trim();
+  const date = document.getElementById('companyDate').value;
+  const address = document.getElementById('companyAddress').value.trim();
+  const greetings = document.getElementById('companyGreetings').value.trim();
+  const notes = document.getElementById('companyNotes').value.trim();
+  const logoInput = document.getElementById('companyLogoInput');
+  const existing = getCompanyInfo() || {};
+
+  if (!companyName) {
+    showCompanySettingsMessage('Please enter a company name.', 'error');
+    return;
+  }
+
+  const info = {
+    companyName,
+    ownerName,
+    mobileNumber,
+    phoneNumber,
+    date,
+    address,
+    greetings,
+    notes,
+    logoDataUrl: existing.logoDataUrl || ''
+  };
+
+  if (logoInput && logoInput.files && logoInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      info.logoDataUrl = e.target.result;
+      localStorage.setItem(COMPANY_INFO_KEY, JSON.stringify(info));
+      renderCompanyInfoPreview();
+      showCompanySettingsMessage(isUpdate ? 'Company info updated successfully.' : 'Company info added successfully.', 'success');
+    };
+    reader.readAsDataURL(logoInput.files[0]);
+    return;
+  }
+
+  localStorage.setItem(COMPANY_INFO_KEY, JSON.stringify(info));
+  renderCompanyInfoPreview();
+  showCompanySettingsMessage(isUpdate ? 'Company info updated successfully.' : 'Company info added successfully.', 'success');
+}
+
+function updateCompanyInfo() {
+  saveCompanyInfo(true);
+}
+
+function clearCompanyInfo() {
+  const currentUser = JSON.parse(localStorage.getItem(STORAGE_KEYS.currentUser) || 'null');
+  if (!currentUser || currentUser.id !== 'admin') {
+    showCompanySettingsMessage('Only admin can access company information.', 'error');
+    return;
+  }
+
+  localStorage.removeItem(COMPANY_INFO_KEY);
+  document.getElementById('companyName').value = '';
+  document.getElementById('ownerName').value = '';
+  document.getElementById('mobileNumber').value = '';
+  document.getElementById('phoneNumber').value = '';
+  document.getElementById('companyDate').value = '';
+  document.getElementById('companyAddress').value = '';
+  document.getElementById('companyGreetings').value = '';
+  document.getElementById('companyNotes').value = '';
+  document.getElementById('companyLogoInput').value = '';
+  renderCompanyInfoPreview();
+  showCompanySettingsMessage('Company info cleared.', 'success');
+}
+
+async function addUser() {
+  const id = document.getElementById('newUserId').value.trim();
+  const name = document.getElementById('newUserName').value.trim();
+  const password = document.getElementById('newUserPass').value;
+  const rights = document.getElementById('newUserRights').value;
+
+  if (!id || !password) { alert('User ID and password required'); return; }
+
+  const users = getData(STORAGE_KEYS.users);
+  if (users.find(u => u.id === id)) { alert('User ID exists'); return; }
+
+  const user = {
+    id,
+    name,
+    password,
+    rights,
+    expiryStart: '',
+    expiryEnd: '',
+    rightsFiles: rights === 'admin' ? ASSET_FILES.slice() : []
+  };
+  users.push(user);
+  saveData(STORAGE_KEYS.users, users);
+  renderUsers();
+  populateLoginUserList();
+  addActivity(`User added: ${id}`);
+
+  // try to add to server
+  try {
+    await fetch('/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(user)
+    });
+  } catch (err) {
+    console.warn('Could not call server /users POST', err);
+  }
+
+  document.getElementById('addUserForm').reset();
+}
+
+function editUserPassword(id) {
+  const newPass = prompt('Enter new password for ' + id + ':');
+  if (!newPass) return;
+  const users = getData(STORAGE_KEYS.users);
+  const idx = users.findIndex(u => u.id === id);
+  if (idx === -1) return;
+  users[idx].password = newPass;
+  saveData(STORAGE_KEYS.users, users);
+  addActivity(`Password changed for ${id}`);
+
+  // attempt server update
+  fetch(`/users/${encodeURIComponent(id)}/password`, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: newPass })
+  }).catch(() => console.warn('Server password update failed'));
+}
+
+function deleteUser(id) {
+  const currentUser = JSON.parse(localStorage.getItem(STORAGE_KEYS.currentUser) || 'null');
+  if (!currentUser || currentUser.id !== 'admin') {
+    alert('Only admin can delete users.');
+    return;
+  }
+  if (!confirm('Delete user ' + id + '?')) return;
+  let users = getData(STORAGE_KEYS.users);
+  users = users.filter(u => u.id !== id);
+  saveData(STORAGE_KEYS.users, users);
+  renderUsers();
+  addActivity(`User deleted: ${id}`);
+  fetch(`/users/${encodeURIComponent(id)}`, { method: 'DELETE' }).catch(() => {});
+}
+
+function loginAsUser(id) {
+  const currentUser = JSON.parse(localStorage.getItem(STORAGE_KEYS.currentUser) || 'null');
+  if (!currentUser || currentUser.id !== 'admin') {
+    alert('Only admin can switch into another account.');
+    return;
+  }
+  const users = getData(STORAGE_KEYS.users);
+  const user = users.find(u => u.id === id);
+  if (!user) return;
+  localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(user));
+  document.getElementById('userBadgeTop').textContent = `👤 ${user.name}`;
+  document.getElementById('settingsUser').textContent = user.name;
+  addActivity(`Admin switched to user: ${user.name}`);
+  renderUsers();
+  applyUserFileRights();
+  setChartView('chart');
+}
+
+// ---------- DASHBOARD METRICS & CHART ----------
+let compareChartInstance = null;
+let editingUserIdForRights = null;
+
+function editUserRights(id) {
+  editingUserIdForRights = id;
+  const users = getData(STORAGE_KEYS.users);
+  const user = users.find(u => u.id === id) || {};
+  document.getElementById('rightsEditorUser').textContent = id;
+  const rightsList = document.getElementById('rightsList');
+  rightsList.innerHTML = '';
+  ASSET_FILES.forEach(fname => {
+    const checked = (user.rightsFiles && user.rightsFiles.includes(fname)) ? 'checked' : '';
+    const safe = fname.replace(/'/g, "\\'");
+    rightsList.innerHTML += `<label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" data-file="${safe}" ${checked}/> ${fname}</label>`;
+  });
+  document.getElementById('rightsEditor').style.display = 'block';
+}
+
+function closeRightsEditor() {
+  editingUserIdForRights = null;
+  const editor = document.getElementById('rightsEditor');
+  if (editor) editor.style.display = 'none';
+}
+
+function saveUserRights() {
+  const id = editingUserIdForRights;
+  if (!id) return;
+  const boxes = Array.from(document.querySelectorAll('#rightsList input[type=checkbox]'));
+  const selected = boxes.filter(b => b.checked).map(b => b.getAttribute('data-file'));
+  const users = getData(STORAGE_KEYS.users);
+  const idx = users.findIndex(u => u.id === id);
+  if (idx === -1) { alert('User not found'); return; }
+  users[idx].rightsFiles = selected;
+  saveData(STORAGE_KEYS.users, users);
+
+  const currentUser = JSON.parse(localStorage.getItem(STORAGE_KEYS.currentUser) || 'null');
+  if (currentUser && currentUser.id === id) {
+    localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(users[idx]));
+  }
+
+  renderUsers();
+  addActivity(`Rights updated for ${id}`);
+  // try server update
+  fetch(`/users/${encodeURIComponent(id)}`, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ rightsFiles: selected })
+  }).catch(() => {});
+  closeRightsEditor();
+  applyUserFileRights();
+}
+
+function applyUserFileRights() {
+  const raw = localStorage.getItem(STORAGE_KEYS.currentUser);
+  const currentUser = raw ? JSON.parse(raw) : null;
+  if (!currentUser) return;
+  const rights = currentUser.rights === 'admin'
+    ? ASSET_FILES.slice()
+    : (currentUser.rightsFiles || []);
+
+  document.querySelectorAll('[data-file]').forEach(el => {
+    const fname = el.getAttribute('data-file');
+    if (!fname) return;
+    el.style.display = rights.includes(fname) ? '' : 'none';
+  });
+
+  const settingsPanel = document.getElementById('settingsUserRightsPanel');
+  if (settingsPanel) {
+    settingsPanel.style.display = currentUser.rights === 'admin' ? 'block' : 'none';
+  }
+
+  const companyInfoPanel = document.getElementById('companyInfoPanel');
+  if (companyInfoPanel) {
+    companyInfoPanel.style.display = currentUser.rights === 'admin' ? 'block' : 'none';
+  }
+
+  const exportBtn = document.getElementById('exportBackupBtn');
+  const importBtn = document.getElementById('importBackupBtn');
+  if (exportBtn) exportBtn.style.display = currentUser.rights === 'admin' ? 'inline-flex' : 'none';
+  if (importBtn) importBtn.style.display = currentUser.rights === 'admin' ? 'inline-flex' : 'none';
+}
+
+function openAssetFile(file) {
+  window.location.href = 'assect/' + file;
+}
+
+function updateDashboard() {
+  const products = getData(STORAGE_KEYS.products);
+  const customers = getData(STORAGE_KEYS.customers);
+  const salesInvoices = JSON.parse(localStorage.getItem('salesInvoices') || '[]');
+  const purchaseInvoices = JSON.parse(localStorage.getItem('purchaseInvoices') || '[]');
+
+  const saleCount = salesInvoices.length;
+  const receiveCount = salesInvoices.reduce((sum, invoice) => sum + (invoice.amount || 0), 0);
+  const purchaseCount = purchaseInvoices.length;
+  const paidCount = purchaseInvoices.reduce((sum, invoice) => sum + (invoice.amount || 0), 0);
+  const optionsCount = customers.length;
+
+  document.getElementById('totalProducts') && (document.getElementById('totalProducts').textContent = products.length);
+  document.getElementById('cardSales').textContent = saleCount;
+  document.getElementById('cardReceive').textContent = receiveCount.toFixed ? receiveCount.toFixed(2) : receiveCount;
+  document.getElementById('cardPurchase').textContent = purchaseCount;
+  document.getElementById('cardPaid').textContent = paidCount.toFixed ? paidCount.toFixed(2) : paidCount;
+  document.getElementById('cardOptions').textContent = optionsCount;
+
+  updateReports();
+  renderPersonCompareChart();
+}
+
+function renderCompareChart() {
+  const sales = getData(STORAGE_KEYS.sales).slice(-10);
+  const purchases = getData(STORAGE_KEYS.purchases).slice(-10);
+
+  const labels = [];
+  const salesData = [];
+  const purchaseData = [];
+
+  for (let i = 0; i < 10; i++) {
+    const s = sales[sales.length - 10 + i] || null;
+    const p = purchases[purchases.length - 10 + i] || null;
+    const label = (s && s.date) || (p && p.date) || (`#${i+1}`);
+    labels.push(label);
+    salesData.push(s ? s.amount || 0 : 0);
+    purchaseData.push(p ? p.amount || 0 : 0);
+  }
+
+  const ctx = document.getElementById('compareChart').getContext('2d');
+  if (compareChartInstance) compareChartInstance.destroy();
+  compareChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Sales', data: salesData, backgroundColor: 'rgba(54, 162, 235, 0.6)' },
+        { label: 'Purchase', data: purchaseData, backgroundColor: 'rgba(255, 99, 132, 0.6)' }
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+}
+
+// Sales comparison UI
+let selectedComparePersons = [];
+let personCompareChart = null;
+let mainListChart = null;
+
+function populatePersonDatalist() {
+  const persons = new Set();
+  getData(STORAGE_KEYS.customers).forEach(c => c.name && persons.add(c.name));
+  JSON.parse(localStorage.getItem('salesInvoices') || '[]').forEach(s => s.customer && persons.add(s.customer));
+  const dl = document.getElementById('personList');
+  if (!dl) return;
+  dl.innerHTML = '';
+  Array.from(persons).forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    dl.appendChild(opt);
+  });
+}
+
+function addComparePerson() {
+  const val = document.getElementById('salesPersonInput').value.trim();
+  if (!val) return;
+  if (selectedComparePersons.includes(val)) return;
+  selectedComparePersons.push(val);
+  renderSelectedPersons();
+  renderPersonCompareChart();
+  document.getElementById('salesPersonInput').value = '';
+}
+
+function removeComparePerson(name) {
+  selectedComparePersons = selectedComparePersons.filter(n => n !== name);
+  renderSelectedPersons();
+  renderPersonCompareChart();
+}
+
+function clearComparePersons() {
+  selectedComparePersons = [];
+  renderSelectedPersons();
+  renderPersonCompareChart();
+}
+
+function renderSelectedPersons() {
+  const container = document.getElementById('selectedPersons');
+  if (!container) return;
+  container.innerHTML = '';
+  selectedComparePersons.forEach(name => {
+    const btn = document.createElement('button');
+    btn.textContent = name + ' ✕';
+    btn.style.marginRight = '6px';
+    btn.onclick = () => removeComparePerson(name);
+    container.appendChild(btn);
+  });
+}
+
+function renderPersonCompareChart() {
+  const sales = JSON.parse(localStorage.getItem('salesInvoices') || '[]');
+  const labels = selectedComparePersons.slice();
+  if (labels.length === 0) {
+    const ctx = document.getElementById('compareChart').getContext('2d');
+    if (personCompareChart) personCompareChart.destroy();
+    personCompareChart = new Chart(ctx, { type: 'bar', data: { labels: ['No data'], datasets: [{ label: 'Sales Amount', data: [0], backgroundColor: ['#ccc'] }] }, options: { responsive: true, maintainAspectRatio: false } });
+    return;
+  }
+  const data = labels.map(name => sales.filter(s => (s.customer||'').toLowerCase() === (name||'').toLowerCase()).reduce((sum, it) => sum + (it.amount || 0), 0));
+  const ctx = document.getElementById('compareChart').getContext('2d');
+  if (personCompareChart) personCompareChart.destroy();
+  personCompareChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Sales Amount',
+        data,
+        backgroundColor: labels.map((_, i) => `hsl(${(i * 60) % 360}, 70%, 50%)`)
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+}
+
+function setChartView(view) {
+  console.log('setChartView called with', view);
+  try {
+    const chartArea = document.getElementById('chartArea');
+    const chartLists = document.getElementById('chartLists');
+  const chartBtn = document.getElementById('chartViewBtn');
+  const listBtn = document.getElementById('listViewBtn');
+    const status = document.getElementById('chartListStatus');
+
+  if (!chartArea || !chartLists || !chartBtn || !listBtn) return;
+  const isChart = view === 'chart';
+  chartArea.style.display = isChart ? 'block' : 'none';
+  chartLists.classList.toggle('hidden', isChart);
+  chartBtn.classList.toggle('active', isChart);
+  listBtn.classList.toggle('active', !isChart);
+
+  if (isChart) {
+    renderMainChart();
+    if (status) status.textContent = 'Chart View';
+  } else {
+    renderTopLists();
+    setListTab('stock');
+    if (status) status.textContent = 'List View: Remaining Stock';
+  }
+  } catch (err) {
+    console.error('setChartView error', err);
+    const status = document.getElementById('chartListStatus');
+    if (status) status.textContent = 'Error switching view';
+  }
+}
+
+function setListTab(tab) {
+  console.log('setListTab called with', tab);
+  try {
+  const tabs = {
+    stock: document.getElementById('stockListPane'),
+    outstanding: document.getElementById('outstandingListPane'),
+    sales: document.getElementById('salesListPane')
+  };
+  const buttons = {
+    stock: document.getElementById('stockTabBtn'),
+    outstanding: document.getElementById('outstandingTabBtn'),
+    sales: document.getElementById('salesTabBtn')
+  };
+
+  Object.keys(tabs).forEach(key => {
+    const panel = tabs[key];
+    const button = buttons[key];
+    if (!panel || !button) return;
+    const isActive = key === tab;
+    panel.classList.toggle('hidden', !isActive);
+    button.classList.toggle('active', isActive);
+  });
+  const status = document.getElementById('chartListStatus');
+  if (status) {
+    if (tab === 'stock') status.textContent = 'List View: Remaining Stock';
+    if (tab === 'outstanding') status.textContent = 'List View: Outstandings';
+    if (tab === 'sales') status.textContent = 'List View: Top Sales';
+  }
+  } catch (err) {
+    console.error('setListTab error', err);
+    const status = document.getElementById('chartListStatus');
+    if (status) status.textContent = 'Error switching list tab';
+  }
+}
+
+function initListTabListeners() {
+  if (window._listTabsInited) return;
+  window._listTabsInited = true;
+
+  const chartBtn = document.getElementById('chartViewBtn');
+  const listBtn = document.getElementById('listViewBtn');
+  if (chartBtn) chartBtn.addEventListener('click', () => { console.log('chartView clicked'); setChartView('chart'); });
+  if (listBtn) listBtn.addEventListener('click', () => { console.log('listView clicked'); setChartView('list'); });
+
+  const stockBtn = document.getElementById('stockTabBtn');
+  const outBtn = document.getElementById('outstandingTabBtn');
+  const salesBtn = document.getElementById('salesTabBtn');
+  if (stockBtn) stockBtn.addEventListener('click', () => { console.log('stock tab'); setListTab('stock'); });
+  if (outBtn) outBtn.addEventListener('click', () => { console.log('outstanding tab'); setListTab('outstanding'); });
+  if (salesBtn) salesBtn.addEventListener('click', () => { console.log('sales tab'); setListTab('sales'); });
+}
+function renderMainChart() {
+  const salesInvoices = JSON.parse(localStorage.getItem('salesInvoices') || '[]');
+  const purchaseInvoices = JSON.parse(localStorage.getItem('purchaseInvoices') || '[]');
+  const months = [];
+  const salesByMonth = {};
+  const purchasesByMonth = {};
+
+  const groupDate = date => {
+    const d = new Date(date || Date.now());
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  };
+
+  [...salesInvoices, ...purchaseInvoices].forEach(item => {
+    const key = groupDate(item.date || item.createdAt || new Date());
+    if (!months.includes(key)) months.push(key);
+    if (salesInvoices.includes(item)) {
+      salesByMonth[key] = (salesByMonth[key] || 0) + (item.amount || 0);
+    }
+    if (purchaseInvoices.includes(item)) {
+      purchasesByMonth[key] = (purchasesByMonth[key] || 0) + (item.amount || 0);
+    }
+  });
+
+  months.sort();
+
+  const salesData = months.map(m => salesByMonth[m] || 0);
+  const purchaseData = months.map(m => purchasesByMonth[m] || 0);
+
+  const ctx = document.getElementById('mainListChart').getContext('2d');
+  if (mainListChart) mainListChart.destroy();
+  mainListChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: months.length ? months : ['No data'],
+      datasets: [
+        { label: 'Sales', data: months.length ? salesData : [0], backgroundColor: 'rgba(34, 197, 94, 0.7)' },
+        { label: 'Purchases', data: months.length ? purchaseData : [0], backgroundColor: 'rgba(59, 130, 246, 0.7)' }
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+}
+
+function renderTopLists() {
+  const products = getData(STORAGE_KEYS.products);
+  const salesInvoices = JSON.parse(localStorage.getItem('salesInvoices') || '[]');
+  const customers = getData(STORAGE_KEYS.customers);
+
+  // 1. REMAINING STOCK - sorted by highest qty where stock is above mini stock
+  const topStock = products
+    .filter(p => (p.qty || 0) > (p.miniStock || 0))
+    .sort((a, b) => (b.qty || 0) - (a.qty || 0))
+    .slice(0, 10);
+
+  // 2. OUTSTANDINGS - calculate balance for each customer
+  const outstandingByCustomer = {};
+  const customerPaidByCustomer = {};
+
+  // Calculate total sales (invoices) for each customer
+  salesInvoices.forEach(invoice => {
+    const customer = invoice.customer || 'Unknown';
+    outstandingByCustomer[customer] = (outstandingByCustomer[customer] || 0) + (invoice.amount || 0);
+    customerPaidByCustomer[customer] = (customerPaidByCustomer[customer] || 0);
+  });
+
+  // Calculate paid amounts (from payment vouchers) - adjust with actual payment tracking
+  const paymentVouchers = JSON.parse(localStorage.getItem('customerPaymentVouchers') || '[]');
+  paymentVouchers.forEach(voucher => {
+    const customer = voucher.customerName || 'Unknown';
+    customerPaidByCustomer[customer] = (customerPaidByCustomer[customer] || 0) + (voucher.amount || 0);
+  });
+
+  // Calculate balance = outstanding - paid
+  const balanceByCustomer = {};
+  Object.keys(outstandingByCustomer).forEach(customer => {
+    const outstanding = outstandingByCustomer[customer] || 0;
+    const paid = customerPaidByCustomer[customer] || 0;
+    balanceByCustomer[customer] = outstanding - paid;
+  });
+
+  const topOutstanding = Object.entries(balanceByCustomer)
+    .filter(([, balance]) => balance > 0) // Only show positive balances
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 10);
+
+  // 3. TOP SALES - calculate total sales amount for each customer
+  const salesByCustomer = {};
+  salesInvoices.forEach(invoice => {
+    const customer = invoice.customer || 'Unknown';
+    salesByCustomer[customer] = (salesByCustomer[customer] || 0) + (invoice.amount || 0);
+  });
+
+  const topSales = Object.entries(salesByCustomer)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 10);
+
+  // Render Stock List
+  const stockList = document.getElementById('topStockList');
+  if (stockList) {
+    if (topStock.length > 0) {
+      stockList.innerHTML = topStock.map((product, idx) => `
+        <tr style="border-bottom:1px solid #e0e0e0;">
+          <td style="padding:8px; border:1px solid #ddd; font-weight:600; color:#1565c0;">${idx + 1}</td>
+          <td style="padding:8px; border:1px solid #ddd;">${product.name}</td>
+          <td style="padding:8px; border:1px solid #ddd; text-align:center; background:#f5f5f5;">${product.miniStock || 0}</td>
+        </tr>
+      `).join('');
+    } else {
+      stockList.innerHTML = '<tr><td colspan="3" style="padding:12px; text-align:center; color:#999;">No stock data available</td></tr>';
+    }
+  }
+
+  // Render Outstanding List
+  const outstandingList = document.getElementById('topOutstandingList');
+  if (outstandingList) {
+    if (topOutstanding.length > 0) {
+      outstandingList.innerHTML = topOutstanding.map(([name, balance], idx) => `
+        <tr style="border-bottom:1px solid #e0e0e0;">
+          <td style="padding:8px; border:1px solid #ddd; font-weight:600; color:#1565c0;">${idx + 1}</td>
+          <td style="padding:8px; border:1px solid #ddd;">${name}</td>
+          <td style="padding:8px; border:1px solid #ddd; text-align:right; background:#fff3cd; font-weight:600;">$${Number(balance || 0).toFixed(2)}</td>
+        </tr>
+      `).join('');
+    } else {
+      outstandingList.innerHTML = '<tr><td colspan="3" style="padding:12px; text-align:center; color:#999;">No outstanding data</td></tr>';
+    }
+  }
+
+  // Render Top Sales List
+  const customerList = document.getElementById('topSellingCustomerList');
+  if (customerList) {
+    if (topSales.length > 0) {
+      customerList.innerHTML = topSales.map(([name, total], idx) => `
+        <tr style="border-bottom:1px solid #e0e0e0;">
+          <td style="padding:8px; border:1px solid #ddd; font-weight:600; color:#1565c0;">${idx + 1}</td>
+          <td style="padding:8px; border:1px solid #ddd;">${name}</td>
+          <td style="padding:8px; border:1px solid #ddd; text-align:right; background:#d4edda; font-weight:600;">$${Number(total || 0).toFixed(2)}</td>
+        </tr>
+      `).join('');
+    } else {
+      customerList.innerHTML = '<tr><td colspan="3" style="padding:12px; text-align:center; color:#999;">No sales data</td></tr>';
+    }
+  }
+
+  // Save to localStorage for offline access
+  localStorage.setItem('topStockData', JSON.stringify(topStock));
+  localStorage.setItem('topOutstandingData', JSON.stringify(topOutstanding));
+  localStorage.setItem('topSalesData', JSON.stringify(topSales));
+}
+
+// render top lists into elements with prefix (e.g., 'dash' -> 'dash_topStockList')
+function renderTopListsInto(prefix) {
+  try {
+    const p = prefix ? prefix + '_' : '';
+    const topStock = JSON.parse(localStorage.getItem('topStockData') || '[]');
+    const topOutstanding = JSON.parse(localStorage.getItem('topOutstandingData') || '[]');
+    const topSales = JSON.parse(localStorage.getItem('topSalesData') || '[]');
+
+    const stockEl = document.getElementById(p + 'topStockList');
+    const outEl = document.getElementById(p + 'topOutstandingList');
+    const salesEl = document.getElementById(p + 'topSellingCustomerList');
+
+    if (stockEl) {
+      if (topStock.length) {
+        stockEl.innerHTML = topStock.map((product, i) => `<tr><td style="padding:8px;border:1px solid #e5e7eb;">${i+1}</td><td style="padding:8px;border:1px solid #e5e7eb;">${product.name}</td><td style="padding:8px;border:1px solid #e5e7eb;text-align:center">${product.miniStock||0}</td></tr>`).join('');
+      } else {
+        stockEl.innerHTML = '<tr><td colspan="3" style="padding:12px;text-align:center;color:#999">No data</td></tr>';
+      }
+    }
+
+    if (outEl) {
+      if (topOutstanding.length) {
+        outEl.innerHTML = topOutstanding.map(([name, bal], i) => `<tr><td style="padding:8px;border:1px solid #e5e7eb;">${i+1}</td><td style="padding:8px;border:1px solid #e5e7eb;">${name}</td><td style="padding:8px;border:1px solid #e5e7eb;text-align:right">$${Number(bal||0).toFixed(2)}</td></tr>`).join('');
+      } else {
+        outEl.innerHTML = '<tr><td colspan="3" style="padding:12px;text-align:center;color:#999">No data</td></tr>';
+      }
+    }
+
+    if (salesEl) {
+      if (topSales.length) {
+        salesEl.innerHTML = topSales.map(([name, total], i) => `<tr><td style="padding:8px;border:1px solid #e5e7eb;">${i+1}</td><td style="padding:8px;border:1px solid #e5e7eb;">${name}</td><td style="padding:8px;border:1px solid #e5e7eb;text-align:right">$${Number(total||0).toFixed(2)}</td></tr>`).join('');
+      } else {
+        salesEl.innerHTML = '<tr><td colspan="3" style="padding:12px;text-align:center;color:#999">No data</td></tr>';
+      }
+    }
+  } catch (err) {
+    console.error('renderTopListsInto error', err);
+  }
+}
+
+function setDashboardView(view) {
+  try {
+    const chartPane = document.getElementById('dashboardChartPane');
+    const listPane = document.getElementById('dashboardListPane');
+    const chartBtn = document.getElementById('dashboardChartBtn');
+    const listBtn = document.getElementById('dashboardListBtn');
+    const status = document.getElementById('dashboardStatus');
+    if (!chartPane || !listPane || !chartBtn || !listBtn) return;
+    const isChart = view === 'chart';
+    chartPane.classList.toggle('hidden', !isChart);
+    listPane.classList.toggle('hidden', isChart);
+    chartBtn.classList.toggle('active', isChart);
+    listBtn.classList.toggle('active', !isChart);
+    if (isChart) {
+      if (status) status.textContent = 'Chart';
+      renderPersonCompareChart();
+    } else {
+      if (status) status.textContent = 'Lists';
+      // ensure lists data is up to date
+      renderTopLists();
+      renderTopListsInto('dash');
+    }
+  } catch (err) {
+    console.error('setDashboardView error', err);
+  }
+}
+
+function initDashboardTabs() {
+  if (window._dashboardTabsInited) return;
+  window._dashboardTabsInited = true;
+  const chartBtn = document.getElementById('dashboardChartBtn');
+  const listBtn = document.getElementById('dashboardListBtn');
+  if (chartBtn) chartBtn.addEventListener('click', () => setDashboardView('chart'));
+  if (listBtn) listBtn.addEventListener('click', () => setDashboardView('list'));
+}
+
+
+// ---------- LOAD ALL ----------
+function loadAllData() {
+  renderProducts();
+  renderSales();
+  renderPurchases();
+  renderCustomers();
+  renderStock();
+  renderActivities();
+  updateDashboard();
+  // sync users from server if available
+  fetchUsersFromServer();
+  renderUsers();
+  renderCompanyInfoPreview();
+  // prepare sales comparison datalist and chart
+  populatePersonDatalist();
+  renderPersonCompareChart();
+  // render top lists for offline access
+  renderTopLists();
+  // ensure tab/list listeners are attached
+  initListTabListeners();
+  initDashboardTabs();
+  // render dashboard lists once
+  renderTopListsInto('dash');
+  setChartView('chart');
+}
+
+// ---------- ENTER KEY LOGIN ----------
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Enter') {
+    const loginVisible = !document.getElementById('loginPage').classList.contains('hidden');
+    const loginButton = document.getElementById('loginButton');
+
+    if (loginVisible && loginButton && !loginButton.disabled) {
+      doLogin();
+    }
+  }
+});
+
+// ---------- INIT ----------
+initializeSystem();
+checkLogin();
+refreshLoginButtonState();
+
+console.log('✅ MyBook ERP System Loaded Successfully');
+
+</script>
+</body>
+</html>

@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sale Ledger - ERP System</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif; }
+body { background:#e8ecf1; min-height:100vh; }
+ 
+/* ── TITLE BAR ── */
+.titlebar {
+  background:linear-gradient(180deg,#4a7fc1 0%,#2d5a8a 100%);
+  color:#fff; padding:4px 10px; display:flex;
+  align-items:center; justify-content:space-between; user-select:none;
+}
+.titlebar-left { display:flex; align-items:center; gap:6px; font-size:13px; }
+.titlebar-icon { width:16px; height:16px; background:#7eb8f0; border-radius:2px; }
+.win-btns { display:flex; gap:3px; }
+.win-btns span {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:24px; height:18px; background:#5a89bc; border:1px solid #2a4f7a;
+  color:#fff; font-size:11px; cursor:pointer; border-radius:2px;
+}
+.win-btns span:hover { background:#7aabd0; }
+ 
+/* ── APP HEADER ── */
+.app-header {
+  /* background:linear-gradient(90deg,#1e4fa0 0%,#2563c2 50%,#1e4fa0 100%); */
+  color:#000000; text-align:center; padding:25px 20px;
+  font-size:30px; font-weight:bold; 
+   letter-spacing:-2px;
+ /* text-shadow:1px 1px 3px rgba(0,0,0,0.4); */
+  /* border-bottom:3px solid #1a3d80; */
+}
+
+#printHeader { display:none; }
+#printHeader .left { flex:1; text-align:left; }
+#printHeader .center { flex:1; text-align:center; }
+#printHeader .right { flex:1; text-align:right; }
+ 
+/* ── TOOLBAR ── */
+.toolbar {
+  background:#d8dde5;
+  border-bottom:2px solid #b0b8c4;
+  padding:10px 16px;
+  display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end;
+}
+.toolbar-group { display:flex; flex-direction:column; gap:5px; }
+.toolbar-group label { font-size:11px; font-weight:bold; color:#333; }
+.toolbar-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.lbl { font-weight:bold; font-size:12px; color:#222; min-width:80px; text-align:right; }
+ 
+input[type="date"], select, input[type="text"] {
+  border:1px solid #999; padding:4px 8px; font-size:12px;
+  background:#fff; border-radius:2px; outline:none;
+}
+input[type="date"]:focus, select:focus, input[type="text"]:focus {
+  border-color:#2563c2; box-shadow:0 0 0 1px #2563c2;
+}
+input[type="date"] { width:155px; }
+select { width:160px; }
+.name-input { width:220px; direction:rtl; }
+ 
+.radio-set { display:flex; flex-direction:column; gap:4px; }
+.radio-set label { display:flex; align-items:center; gap:5px; font-size:12px; cursor:pointer; }
+ 
+.chk-label { display:flex; align-items:center; gap:4px; font-size:12px; cursor:pointer; white-space:nowrap; }
+ 
+.btn-group { display:flex; flex-direction:column; gap:5px; margin-left:auto; }
+.btn-pdf {
+  background:linear-gradient(180deg,#d43333,#aa1111);
+  color:#fff; border:1px solid #881111;
+  padding:6px 22px; font-size:13px; font-weight:bold;
+  cursor:pointer; border-radius:3px; width:96px;
+}
+.btn-print {
+  background:linear-gradient(180deg,#f0f0f0,#d4d4d4);
+  color:#222; border:1px solid #aaa;
+  padding:6px 22px; font-size:13px;
+  cursor:pointer; border-radius:3px; width:96px;
+}
+.btn-generate {
+  background:linear-gradient(180deg,#28a228,#177017);
+  color:#fff; border:1px solid #126012;
+  padding:6px 22px; font-size:13px; font-weight:bold;
+  cursor:pointer; border-radius:3px; width:96px;
+}
+.btn-pdf:hover { background:linear-gradient(180deg,#ee4444,#cc1111); }
+.btn-print:hover { background:linear-gradient(180deg,#fff,#e0e0e0); }
+.btn-generate:hover { background:linear-gradient(180deg,#33bb33,#1e881e); }
+ 
+/* ── DATA TABLE ── */
+.table-wrapper { overflow-x:auto; }
+table {
+  width:100%; border-collapse:collapse; font-size:12.5px;
+  min-width:700px;
+}
+thead tr {
+  background:linear-gradient(180deg,#3a6faa,#254f80);
+  color:#fff;
+}
+thead th {
+  padding:7px 10px; border:1px solid #1e3f6a;
+  font-weight:bold; font-size:13px; white-space:nowrap;
+}
+thead th.num { text-align:right; }
+tbody tr { background:#fff; }
+tbody tr:nth-child(even) { background:#eef3fc; }
+tbody tr.selected { background:#ccdeff !important; }
+tbody tr:hover { background:#ddeeff; cursor:pointer; }
+tbody td {
+  padding:4px 10px; border:1px solid #d4d8de; font-size:12.5px;
+}
+tbody td.detail { direction:rtl; text-align:right; font-size:13px; }
+tbody td.num { text-align:right; font-family:'Courier New',monospace; white-space:nowrap; }
+tbody td.sr { text-align:center; font-weight:bold; }
+tbody td.debit { color:#cc2200; text-align:right; font-family:'Courier New',monospace; }
+tbody td.credit { color:#006622; text-align:right; font-family:'Courier New',monospace; }
+tbody td.balance { text-align:right; font-family:'Courier New',monospace; }
+.no-data td { text-align:center; color:#888; font-style:italic; padding:20px; }
+ 
+/* ── FOOTER ── */
+.footer-bar {
+  background:#d0d5dc; border-top:2px solid #a8adb8;
+  padding:7px 14px; display:flex; justify-content:space-between;
+  align-items:center; font-size:12px; flex-wrap:wrap; gap:8px;
+}
+.found-count { color:#444; font-weight:bold; }
+.totals-row { display:flex; gap:10px; flex-wrap:wrap; }
+.total-box {
+  display:flex; align-items:center; gap:8px;
+  background:linear-gradient(90deg,#2a2a2a,#444);
+  color:#fff; padding:5px 14px; border-radius:3px;
+}
+.total-box .t-label { font-size:12px; }
+.total-box .t-value { color:#ffe066; font-size:14px; font-weight:bold; font-family:'Courier New',monospace; }
+ 
+/* ── STATUS TABS ── */
+.data-tabs {
+  background:#c8cdd6; border-bottom:1px solid #aaa;
+  padding:6px 14px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;
+}
+.tab-info {
+  font-size:11px; background:#fff; border:1px solid #aaa;
+  border-radius:12px; padding:2px 10px; color:#333;
+  cursor:default;
+}
+.tab-info strong { color:#1a4fa0; }
+ 
+/* ── PRINT ── */
+@media print {
+  .titlebar, .toolbar, .data-tabs, .footer-bar, .btn-group,
+  .win-btns { display:none !important; }
+  /* hide on-screen header and show print title below the print header */
+  .app-header { display:block !important; margin-top:70px !important; }
+  /* Fixed print header that appears at the top of every printed page */
+  #printHeader { display:flex !important; align-items:center; justify-content:space-between; padding:10px 14px; border-bottom:1px solid #ddd; -webkit-print-color-adjust:exact; position:fixed; top:0; left:0; right:0; background:#fff; z-index:9999; }
+  #printHeader img { height:48px; }
+  #printHeader .left { flex:1; text-align:left; }
+  #printHeader .center { flex:1; text-align:center; font-size:16px; font-weight:700; }
+  #printHeader .right { flex:1; text-align:right; font-size:12px; }
+  body { background:#fff; }
+  thead tr { background:#1e4fa0 !important; -webkit-print-color-adjust:exact; }
+  tbody tr:nth-child(even) { background:#f0f4fc !important; -webkit-print-color-adjust:exact; }
+  /* reserve space for fixed header so content doesn't overlap */
+  @page { margin-top:120px; }
+  body { margin-top:120px !important; }
+  .table-wrapper { margin-top:0; }
+  /* avoid hiding header when printing multiple pages in some browsers */
+  header, #printHeader { -webkit-print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+
+<div id="printHeader">
+  <div class="left"><img id="printLogo" src="" alt="Logo"></div>
+  <div class="center" id="printCompany"></div>
+  <div class="right" id="printAddress"></div>
+</div>
+ 
+<!-- TITLE BAR -->
+<!-- <div class="titlebar">
+  <div class="titlebar-left">
+    <div class="titlebar-icon"></div>
+    <span>Sale Ledger — ERP System</span>
+  </div>
+  <div class="win-btns">
+    <span title="Minimize">_</span>
+    <span title="Maximize">□</span>
+    <span title="Close">✕</span>
+  </div>
+</div> -->
+ 
+<!-- HEADER -->
+<div class="app-header">S A L E &nbsp; &nbsp; L E D G E R</div>
+ 
+<!-- TOOLBAR -->
+<div class="toolbar">
+ 
+  <!-- Dates -->
+  <div>
+    <div class="toolbar-row" style="margin-bottom:6px">
+      <span class="lbl">From Date</span>
+      <input type="date" id="fromDate">
+    </div>
+    <div class="toolbar-row">
+      <span class="lbl">To Date</span>
+      <input type="date" id="toDate">
+    </div>
+  </div>
+ 
+  <!-- Radio -->
+  <div>
+    <div class="radio-set">
+      <label><input type="radio" name="docType" value="both"> Both</label>
+      <label><input type="radio" name="docType" value="invoice" checked> Invoice</label>
+      <label><input type="radio" name="docType" value="voucher"> Voucher</label>
+    </div>
+  </div>
+ 
+  <!-- Sort + Name + Ref -->
+  <div>
+    <div class="toolbar-row" style="margin-bottom:6px">
+      <span class="lbl">Sort</span>
+      <select id="sortBy">
+        <option value="none">None</option>
+        <option value="date">Date</option>
+        <option value="name">Name</option>
+        <option value="amount">Amount</option>
+        <option value="code">Code</option>
+      </select>
+    </div>
+    <div class="toolbar-row" style="margin-bottom:6px">
+      <span class="lbl">Name</span>
+      <input type="text" class="name-input" id="filterName" placeholder="Search customer / supplier...">
+      <label class="chk-label"><input type="checkbox" id="allNames"> All</label>
+    </div>
+    <div class="toolbar-row">
+      <span class="lbl">Sub Customer</span>
+      <input type="text" id="filterRef" style="width:160px" placeholder="Invoice / Voucher No">
+      <label class="chk-label"><input type="checkbox" id="allRef">Sub Customer</label>
+    </div>
+  </div>
+ 
+  <!-- Action Buttons -->
+  <div class="btn-group">
+    <button class="btn-pdf" onclick="downloadPDF()">Pdf</button>
+    <button class="btn-print" onclick="window.print()">Print</button>
+    <button class="btn-generate" onclick="generateLedger()">Generate</button>
+  </div>
+</div>
+ 
+<!-- DATA SUMMARY TABS -->
+<div class="data-tabs" id="dataTabs">
+  <span class="tab-info">Loading data...</span>
+</div>
+ 
+<!-- TABLE -->
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th style="width:40px">Sr#</th>
+        <th style="width:100px">Date</th>
+        <th style="width:170px">Code</th>
+        <th>Detail</th>
+        <th class="num" style="width:130px">Debit</th>
+        <th class="num" style="width:110px">Credit</th>
+        <th class="num" style="width:120px">Balance</th>
+      </tr>
+    </thead>
+    <tbody id="ledgerBody">
+      <tr class="no-data"><td colspan="7">Click "Generate" to load ledger data</td></tr>
+    </tbody>
+  </table>
+</div>
+ 
+<!-- FOOTER -->
+<div class="footer-bar">
+  <span class="found-count" id="foundCount">Found 0 Rows...</span>
+  <div class="totals-row">
+    <div class="total-box">
+      <span class="t-label">Total Debit</span>
+      <span class="t-value" id="totalDebit">0.00</span>
+    </div>
+    <div class="total-box">
+      <span class="t-label">Total Credit</span>
+      <span class="t-value" id="totalCredit">0.00</span>
+    </div>
+    <div class="total-box">
+      <span class="t-label">Net Balance</span>
+      <span class="t-value" id="netBalance">0.00</span>
+    </div>
+  </div>
+</div>
+ 
+<script>
+// ══════════════════════════════════════════════
+//  LOAD ALL ERP localStorage DATA
+// ══════════════════════════════════════════════
+ 
+function safeGet(key) {
+  try { return JSON.parse(localStorage.getItem(key) || '[]') || []; }
+  catch(e) { return []; }
+}
+ 
+function loadAllData() {
+  return {
+    salesInvoices:          safeGet('salesInvoices'),
+    purchaseInvoices:       safeGet('purchaseInvoices'),
+    purchaseLedger:         safeGet('purchaseLedger'),
+    customers:              safeGet('customers'),
+    suppliers:              safeGet('suppliers'),
+    products:               safeGet('products'),
+    units:                  safeGet('units'),
+    customerPaymentVouchers: safeGet('customerPaymentVouchers'),
+    creditCustomerVouchers:  safeGet('creditCustomerVouchers'),
+    creditPurchaseVouchers:  safeGet('creditPurchaseVouchers'),
+    purchasePaymentVouchers: safeGet('purchasePaymentVouchers'),
+    productionData:          safeGet('productionData'),
+    rawMaterialItems:        safeGet('rawMaterialItems'),
+    firstCategories:         safeGet('account_first_categories'),
+    secondCategories:        safeGet('account_second_categories'),
+  };
+}
+ 
+// ══════════════════════════════════════════════
+//  BUILD LEDGER ROWS FROM ALL SOURCES
+// ══════════════════════════════════════════════
+ 
+function buildLedgerRows(data) {
+  const rows = [];
+ 
+  // 1. SALES INVOICES → DEBIT
+  data.salesInvoices.forEach(inv => {
+    rows.push({
+      date:   inv.invoiceDate || inv.date || '',
+      code:   inv.invoiceNo || 'INVOICE',
+      detail: inv.customerName || inv.customer || inv.name || 'Sale Invoice',
+      debit:  Number(inv.netAmount || inv.grandTotal || inv.total || 0),
+      credit: 0,
+      type:   'invoice',
+      source: 'Sale Invoice'
+    });
+  });
+ 
+  // 2. CUSTOMER PAYMENT VOUCHERS → CREDIT
+  data.customerPaymentVouchers.forEach(v => {
+    rows.push({
+      date:   v.date || '',
+      code:   v.voucherNo || 'CPV',
+      detail: (v.customer || v.customerName || '') + (v.subCustomer ? ' | ' + v.subCustomer : ''),
+      debit:  0,
+      credit: Number(v.amount || 0),
+      type:   'voucher',
+      source: 'Customer Payment'
+    });
+  });
+ 
+  // 3. CREDIT CUSTOMER VOUCHERS → CREDIT
+  data.creditCustomerVouchers.forEach(v => {
+    rows.push({
+      date:   v.voucherDate || v.date || '',
+      code:   v.voucherNo || 'CCPV',
+      detail: (v.customerName || '') + (v.subCustomer ? ' | ' + v.subCustomer : ''),
+      debit:  0,
+      credit: Number(v.amount || 0),
+      type:   'voucher',
+      source: 'Credit Customer'
+    });
+  });
+ 
+  // 4. PURCHASE INVOICES → CREDIT (expense)
+  data.purchaseInvoices.forEach(inv => {
+    rows.push({
+      date:   inv.invoiceDate || inv.date || '',
+      code:   inv.invoiceNo || 'PINV',
+      detail: inv.supplier || 'Purchase Invoice',
+      debit:  0,
+      credit: Number(inv.netAmount || inv.total || 0),
+      type:   'invoice',
+      source: 'Purchase Invoice'
+    });
+  });
+ 
+  // 5. PURCHASE PAYMENT VOUCHERS
+  data.purchasePaymentVouchers.forEach(v => {
+    rows.push({
+      date:   v.date || '',
+      code:   v.voucherNo || 'PV',
+      detail: v.supplier || 'Purchase Payment',
+      debit:  Number(v.amount || 0),
+      credit: 0,
+      type:   'voucher',
+      source: 'Purchase Payment'
+    });
+  });
+ 
+  // 6. CREDIT PURCHASE VOUCHERS
+  data.creditPurchaseVouchers.forEach(v => {
+    rows.push({
+      date:   v.date || '',
+      code:   v.voucherNo || 'CPV',
+      detail: v.supplier || 'Credit Purchase',
+      debit:  0,
+      credit: Number(v.amount || 0),
+      type:   'voucher',
+      source: 'Credit Purchase'
+    });
+  });
+ 
+  // 7. PURCHASE LEDGER ENTRIES
+  data.purchaseLedger.forEach(item => {
+    rows.push({
+      date:   item.date || '',
+      code:   item.invoice || item.voucher || 'PL',
+      detail: item.name || 'Purchase Ledger',
+      debit:  0,
+      credit: Number(item.amount || 0),
+      type:   'invoice',
+      source: 'Purchase Ledger'
+    });
+  });
+ 
+  return rows;
+}
+ 
+// ══════════════════════════════════════════════
+//  FORMAT NUMBER
+// ══════════════════════════════════════════════
+function fmt(n) {
+  return Number(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+ 
+// ══════════════════════════════════════════════
+//  UPDATE SUMMARY TABS
+// ══════════════════════════════════════════════
+function updateTabs(data) {
+  const tabs = document.getElementById('dataTabs');
+  const items = [
+    ['Sales Invoices',  data.salesInvoices.length],
+    ['Customers',       data.customers.length],
+    ['Suppliers',       data.suppliers.length],
+    ['Products',        data.products.length],
+    ['Purchase Inv.',   data.purchaseInvoices.length],
+    ['Cust. Vouchers',  data.customerPaymentVouchers.length],
+    ['Credit Cust.',    data.creditCustomerVouchers.length],
+    ['Purchase Pay.',   data.purchasePaymentVouchers.length],
+    ['Credit Purch.',   data.creditPurchaseVouchers.length],
+    ['Purchase Ledger', data.purchaseLedger.length],
+    ['Production',      data.productionData.length],
+  ];
+  tabs.innerHTML = items.map(([label, count]) =>
+    `<span class="tab-info">${label}: <strong>${count}</strong></span>`
+  ).join('');
+}
+ 
+// ══════════════════════════════════════════════
+//  MAIN GENERATE
+// ══════════════════════════════════════════════
+function generateLedger() {
+  const data = loadAllData();
+  updateTabs(data);
+ 
+  let rows = buildLedgerRows(data);
+ 
+  // ── FILTER: Date Range ──
+  const fromDate = document.getElementById('fromDate').value;
+  const toDate   = document.getElementById('toDate').value;
+  if (fromDate) rows = rows.filter(r => !r.date || r.date >= fromDate);
+  if (toDate)   rows = rows.filter(r => !r.date || r.date <= toDate);
+ 
+  // ── FILTER: Doc Type ──
+  const docType = document.querySelector('input[name="docType"]:checked').value;
+  if (docType !== 'both') rows = rows.filter(r => r.type === docType);
+ 
+  // ── FILTER: Name ──
+  const allNames = document.getElementById('allNames').checked;
+  const filterName = document.getElementById('filterName').value.trim().toLowerCase();
+  if (!allNames && filterName) {
+    rows = rows.filter(r => r.detail.toLowerCase().includes(filterName));
+  }
+ 
+  // ── FILTER: Reference ──
+  const allRef = document.getElementById('allRef').checked;
+  const filterRef = document.getElementById('filterRef').value.trim().toLowerCase();
+  if (!allRef && filterRef) {
+    rows = rows.filter(r => r.code.toLowerCase().includes(filterRef));
+  }
+ 
+  // ── SORT ──
+  const sortBy = document.getElementById('sortBy').value;
+  if (sortBy === 'date')   rows.sort((a,b) => (a.date||'').localeCompare(b.date||''));
+  if (sortBy === 'name')   rows.sort((a,b) => a.detail.localeCompare(b.detail));
+  if (sortBy === 'amount') rows.sort((a,b) => (b.debit + b.credit) - (a.debit + a.credit));
+  if (sortBy === 'code')   rows.sort((a,b) => a.code.localeCompare(b.code));
+ 
+  // ── RENDER ──
+  const tbody = document.getElementById('ledgerBody');
+  tbody.innerHTML = '';
+ 
+  if (rows.length === 0) {
+    tbody.innerHTML = '<tr class="no-data"><td colspan="7">No records found. Make sure data exists in the ERP system.</td></tr>';
+    document.getElementById('foundCount').textContent = 'Found 0 Rows...';
+    document.getElementById('totalDebit').textContent   = '0.00';
+    document.getElementById('totalCredit').textContent  = '0.00';
+    document.getElementById('netBalance').textContent   = '0.00';
+    return;
+  }
+ 
+  let totalDebit = 0, totalCredit = 0, runningBalance = 0;
+ 
+  rows.forEach((row, i) => {
+    runningBalance += row.debit - row.credit;
+    totalDebit  += row.debit;
+    totalCredit += row.credit;
+ 
+    const tr = document.createElement('tr');
+    if (i === 0) tr.classList.add('selected');
+    tr.innerHTML = `
+      <td class="sr">${i+1}</td>
+      <td>${row.date || '—'}</td>
+      <td style="font-size:11.5px">${row.code}</td>
+      <td class="detail">${row.detail || '—'} <span style="font-size:10px;color:#888;direction:ltr">[${row.source}]</span></td>
+      <td class="debit">${row.debit > 0 ? fmt(row.debit) : ''}</td>
+      <td class="credit">${row.credit > 0 ? fmt(row.credit) : ''}</td>
+      <td class="balance" style="color:${runningBalance>=0?'#003388':'#cc0000'}">${fmt(runningBalance)}</td>
+    `;
+    tr.onclick = () => {
+      document.querySelectorAll('#ledgerBody tr').forEach(t => t.classList.remove('selected'));
+      tr.classList.add('selected');
+    };
+    tbody.appendChild(tr);
+  });
+ 
+  document.getElementById('foundCount').textContent    = `Found ${rows.length} Rows...`;
+  document.getElementById('totalDebit').textContent    = fmt(totalDebit);
+  document.getElementById('totalCredit').textContent   = fmt(totalCredit);
+  document.getElementById('netBalance').textContent    = fmt(totalDebit - totalCredit);
+}
+ 
+// ══════════════════════════════════════════════
+//  CHECKBOX HELPERS
+// ══════════════════════════════════════════════
+document.getElementById('allNames').addEventListener('change', function() {
+  if (this.checked) document.getElementById('filterName').value = '';
+});
+document.getElementById('allRef').addEventListener('change', function() {
+  if (this.checked) document.getElementById('filterRef').value = '';
+});
+ 
+// ══════════════════════════════════════════════
+//  PDF DOWNLOAD
+// ══════════════════════════════════════════════
+function downloadPDF() {
+  alert('To save as PDF: Use the Print button and select "Save as PDF" in the print dialog.');
+  window.print();
+}
+ 
+// ══════════════════════════════════════════════
+//  SET DEFAULT DATE RANGE (last 30 days)
+// ══════════════════════════════════════════════
+(function setDefaultDates() {
+  const today = new Date();
+  const from  = new Date(today);
+  from.setDate(from.getDate() - 30);
+  document.getElementById('toDate').value   = today.toISOString().split('T')[0];
+  document.getElementById('fromDate').value = from.toISOString().split('T')[0];
+})();
+ 
+// ══════════════════════════════════════════════
+//  AUTO-LOAD ON PAGE READY
+// ══════════════════════════════════════════════
+function populatePrintHeader() {
+  try {
+    const info = JSON.parse(localStorage.getItem('erp_company_info') || 'null') || {};
+    const logoEl = document.getElementById('printLogo');
+    const compEl = document.getElementById('printCompany');
+    const addrEl = document.getElementById('printAddress');
+    if (logoEl) {
+      if (info.logoDataUrl) {
+        logoEl.src = info.logoDataUrl;
+        logoEl.style.display = 'block';
+      } else {
+        logoEl.style.display = 'none';
+      }
+    }
+    if (compEl) compEl.textContent = info.companyName || '';
+    if (addrEl) addrEl.textContent = info.address || '';
+  } catch (e) {
+    /* ignore */
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  const data = loadAllData();
+  updateTabs(data);
+  populatePrintHeader();
+  generateLedger();
+});
+</script>
+ 
+</body>
+</html>

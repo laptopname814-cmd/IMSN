@@ -1,0 +1,1163 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Purchase Invoice System</title>
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial;
+}
+
+body{
+  background:#f3f4f6;
+  padding:20px;
+}
+
+.container{
+  max-width:1500px;
+  margin:auto;
+}
+
+.card{
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  margin-bottom:20px;
+  box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* remove shadow for item list card */
+.item-card{
+  box-shadow:none !important;
+  margin-bottom:0 !important;
+  padding-bottom:12px !important;
+}
+
+/* reduce vertical gap above the invoice list */
+.invoice-list-card{
+  margin-top:8px !important;
+  margin-bottom:12px !important;
+}
+
+h1,h2{
+  margin-bottom:20px;
+  color:#111827;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:
+  repeat(auto-fit,minmax(220px,1fr));
+  gap:10px;
+  margin-bottom:15px;
+}
+
+input,
+textarea{
+  width:100%;
+  padding:10px;
+  border:1px solid #ccc;
+  border-radius:5px;
+}
+
+button{
+  padding:10px 15px;
+  border:none;
+  border-radius:5px;
+  color:white;
+  cursor:pointer;
+  margin-right:5px;
+}
+
+.add-btn{
+  background:#2563eb;
+}
+
+.save-btn{
+  background:green;
+}
+
+.edit-btn{
+  background:orange;
+}
+
+.delete-btn{
+  background:red;
+}
+
+.reset-btn{
+  background:#dc2626;
+}
+
+.print-btn{
+  background:#9333ea;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+table th,
+table td{
+  border:1px solid #ddd;
+  padding:10px;
+  text-align:center;
+}
+
+table th{
+  background:#111827;
+  color:white;
+}
+
+.summary{
+  display:grid;
+  grid-template-columns:
+  repeat(auto-fit,minmax(220px,1fr));
+  gap:15px;
+}
+
+.summary-box{
+  background:#f9fafb;
+  padding:15px;
+  border-radius:5px;
+}
+
+@media print{
+
+  .no-print{
+    display:none;
+  }
+
+  body{
+    background:white;
+  }
+
+  .company-print-header{
+    display:block !important;
+  }
+    /* hide only logo in this file's print preview */
+    .company-print-header .company-logo{
+      display:none;
+    }
+
+    /* hide item list table header in print */
+    .item-list-table thead{
+      display:none !important;
+    }
+
+}
+
+.company-print-header{
+  display:none;
+  width:100%;
+  border-bottom:2px solid #000;
+  padding-bottom:10px;
+  margin-bottom:10px;
+}
+
+.company-print-header-inner{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.company-print-header .left,
+.company-print-header .center,
+.company-print-header .right{
+  width:33%;
+}
+
+.company-print-header .left{
+  text-align:left;
+}
+
+.company-print-header .center{
+  text-align:center;
+}
+
+.company-print-header .right{
+  text-align:right;
+}
+
+.company-print-header img{
+  max-height:70px;
+}
+  .company-print-header .company-logo img{
+    max-height:70px;
+  }
+
+.company-print-header .company-name{
+  font-size:18px;
+  font-weight:bold;
+}
+
+.company-print-header .company-address{
+  font-size:13px;
+  color:#444;
+  white-space:pre-wrap;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="company-print-header" id="companyPrintHeader"></div>
+
+<div class="container">
+
+  <!-- INVOICE FORM -->
+
+  <div class="card no-print">
+
+    <h1>Purchase Invoice</h1>
+
+    <div class="grid">
+
+      <input
+        type="text"
+        id="supplier"
+        placeholder="Supplier Name"
+      >
+
+      <input
+        type="text"
+        id="invoiceNo"
+        readonly
+      >
+
+      <input
+        type="date"
+        id="invoiceDate"
+      >
+
+    </div>
+
+    <textarea
+      id="remarks"
+      rows="3"
+      placeholder="Remarks"
+    ></textarea>
+
+  </div>
+
+  <!-- ITEM FORM -->
+
+  <div class="card no-print">
+
+    <h2>Add Item</h2>
+
+    <div class="grid">
+
+      <input
+        type="text"
+        id="itemName"
+        placeholder="Item Name"
+      >
+
+      <input
+        type="number"
+        id="qty"
+        placeholder="Quantity"
+      >
+
+      <input
+        type="number"
+        id="rate"
+        placeholder="Rate"
+      >
+
+      <input
+        type="number"
+        id="discount"
+        placeholder="Discount"
+      >
+
+      <input
+        type="number"
+        id="total"
+        placeholder="Total"
+        readonly
+      >
+
+    </div>
+
+    <button
+      class="add-btn"
+      onclick="addItem()"
+    >
+      Add Item
+    </button>
+
+  </div>
+
+  <!-- ITEM TABLE -->
+
+
+  <div class="card item-card">
+
+    <h2 class="no-print">Item List</h2>
+    <table class="item-list-table">
+
+      <thead>
+
+        <tr>
+
+          <th>ID</th>
+          <th>Item</th>
+          <th>Qty</th>
+          <th>Rate</th>
+          <th>Discount</th>
+          <th>Total</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody id="invoiceTable"></tbody>
+
+    </table>
+
+  </div>
+
+  <!-- AMOUNT DETAILS -->
+
+  <div class="card no-print">
+
+    <h2>Amount Details</h2>
+
+    <div class="summary">
+
+      <div class="summary-box">
+
+        <h3>Amount Total</h3>
+
+        <input
+          type="number"
+          id="amountTotal"
+          value="0"
+          onkeyup="calculateNetAmount()"
+        >
+
+      </div>
+
+      <div class="summary-box">
+
+        <h3>Discount Total</h3>
+
+        <input
+          type="number"
+          id="discountTotal"
+          value="0"
+          onkeyup="calculateNetAmount()"
+        >
+
+      </div>
+
+      <div class="summary-box">
+
+        <h3>Other Charge</h3>
+
+        <input
+          type="number"
+          id="otherCharge"
+          value="0"
+          onkeyup="calculateNetAmount()"
+        >
+
+      </div>
+
+      <div class="summary-box">
+
+        <h3>Net Amount</h3>
+
+        <input
+          type="number"
+          id="netAmount"
+          readonly
+        >
+
+      </div>
+
+    </div>
+
+    <br>
+
+    <button
+      class="save-btn"
+      onclick="saveInvoice()"
+    >
+      Save Invoice
+    </button>
+
+    <button
+      class="reset-btn"
+      onclick="resetInvoice()"
+    >
+      Reset
+    </button>
+
+  </div>
+
+  <!-- SEARCH -->
+
+  <div class="card no-print">
+
+    <h2>Search Invoice</h2>
+
+    <div class="grid">
+
+      <input
+        type="text"
+        id="searchInvoice"
+        placeholder="Search Invoice No"
+        onkeyup="searchInvoiceList()"
+      >
+
+      <input
+        type="text"
+        id="searchSupplier"
+        placeholder="Search Supplier"
+        onkeyup="searchInvoiceList()"
+      >
+
+    </div>
+
+  </div>
+
+  <!-- INVOICE LIST -->
+
+  <div class="card">
+
+    <h2>Invoice List</h2>
+
+    <button
+      class="print-btn no-print"
+      onclick="window.print()"
+    >
+      Print List
+    </button>
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>ID</th>
+          <th>Invoice No</th>
+          <th>Supplier</th>
+          <th>Date</th>
+          <th>Net Amount</th>
+          <th class="no-print">Action</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody id="invoiceList"></tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+<script>
+
+let invoiceItems = [];
+
+let invoices =
+  JSON.parse(
+    localStorage.getItem(
+      "purchaseInvoices"
+    )
+  ) || [];
+
+let editIndex = -1;
+
+
+// AUTO UNIQUE INVOICE NUMBER
+
+function generateInvoiceNo(){
+
+  let lastNumber = 0;
+
+  if(invoices.length > 0){
+
+    let lastInvoice =
+      invoices[invoices.length - 1]
+      .invoiceNo;
+
+    let numberPart =
+      parseInt(
+        lastInvoice.replace(
+          "PINV-",
+          ""
+        )
+      );
+
+    lastNumber = numberPart;
+
+  }
+
+  let nextNumber =
+    lastNumber + 1;
+
+  let invoiceNumber =
+    "PINV-" +
+    String(nextNumber)
+    .padStart(4,"0");
+
+  document.getElementById(
+    "invoiceNo"
+  ).value = invoiceNumber;
+
+}
+
+
+// ITEM TOTAL
+
+document.getElementById("qty")
+.addEventListener(
+  "keyup",
+  calculateItemTotal
+);
+
+document.getElementById("rate")
+.addEventListener(
+  "keyup",
+  calculateItemTotal
+);
+
+document.getElementById("discount")
+.addEventListener(
+  "keyup",
+  calculateItemTotal
+);
+
+function calculateItemTotal(){
+
+  let qty =
+    Number(
+      document.getElementById(
+        "qty"
+      ).value
+    );
+
+  let rate =
+    Number(
+      document.getElementById(
+        "rate"
+      ).value
+    );
+
+  let discount =
+    Number(
+      document.getElementById(
+        "discount"
+      ).value
+    );
+
+  let total =
+    (qty * rate) - discount;
+
+  document.getElementById(
+    "total"
+  ).value = total;
+
+}
+
+
+// ADD ITEM
+
+function addItem(){
+
+  let item = {
+
+    itemName:
+      document.getElementById(
+        "itemName"
+      ).value,
+
+    qty:
+      document.getElementById(
+        "qty"
+      ).value,
+
+    rate:
+      document.getElementById(
+        "rate"
+      ).value,
+
+    discount:
+      document.getElementById(
+        "discount"
+      ).value,
+
+    total:
+      document.getElementById(
+        "total"
+      ).value
+
+  };
+
+  if(
+    item.itemName === "" ||
+    item.qty === "" ||
+    item.rate === ""
+  ){
+
+    alert("Fill Item Details");
+
+    return;
+
+  }
+
+  invoiceItems.push(item);
+
+  displayItems();
+
+  clearItemForm();
+
+}
+
+
+// DISPLAY ITEMS
+
+function displayItems(){
+
+  let table =
+    document.getElementById(
+      "invoiceTable"
+    );
+
+  table.innerHTML = "";
+
+  invoiceItems.forEach((item,index)=>{
+
+    table.innerHTML += `
+
+      <tr>
+
+        <td>${index + 1}</td>
+
+        <td>${item.itemName}</td>
+
+        <td>${item.qty}</td>
+
+        <td>${item.rate}</td>
+
+        <td>${item.discount}</td>
+
+        <td>${item.total}</td>
+
+      </tr>
+
+    `;
+
+  });
+
+}
+
+
+// CALCULATE NET AMOUNT
+
+function calculateNetAmount(){
+
+  let amount =
+    Number(
+      document.getElementById(
+        "amountTotal"
+      ).value
+    );
+
+  let discount =
+    Number(
+      document.getElementById(
+        "discountTotal"
+      ).value
+    );
+
+  let other =
+    Number(
+      document.getElementById(
+        "otherCharge"
+      ).value
+    );
+
+  let net =
+    amount -
+    discount +
+    other;
+
+  document.getElementById(
+    "netAmount"
+  ).value = net;
+
+}
+
+
+// SAVE INVOICE
+
+function saveInvoice(){
+
+  let invoiceNo =
+    document.getElementById(
+      "invoiceNo"
+    ).value;
+
+  let duplicate =
+    invoices.find(invoice =>
+
+      invoice.invoiceNo === invoiceNo
+
+    );
+
+  if(
+    duplicate &&
+    editIndex === -1
+  ){
+
+    generateInvoiceNo();
+
+    invoiceNo =
+      document.getElementById(
+        "invoiceNo"
+      ).value;
+
+  }
+
+  let invoice = {
+
+    supplier:
+      document.getElementById(
+        "supplier"
+      ).value,
+
+    invoiceNo:invoiceNo,
+
+    invoiceDate:
+      document.getElementById(
+        "invoiceDate"
+      ).value,
+
+    remarks:
+      document.getElementById(
+        "remarks"
+      ).value,
+
+    amountTotal:
+      document.getElementById(
+        "amountTotal"
+      ).value,
+
+    discountTotal:
+      document.getElementById(
+        "discountTotal"
+      ).value,
+
+    otherCharge:
+      document.getElementById(
+        "otherCharge"
+      ).value,
+
+    netAmount:
+      document.getElementById(
+        "netAmount"
+      ).value,
+
+    items:invoiceItems
+
+  };
+
+  if(
+    invoice.supplier === "" ||
+    invoice.invoiceDate === ""
+  ){
+
+    alert("Fill Invoice Details");
+
+    return;
+
+  }
+
+  if(editIndex === -1){
+
+    invoices.push(invoice);
+
+  }else{
+
+    invoices[editIndex] = invoice;
+
+    editIndex = -1;
+
+  }
+
+  localStorage.setItem(
+
+    "purchaseInvoices",
+
+    JSON.stringify(invoices)
+
+  );
+
+  alert("Invoice Saved");
+
+  showInvoices();
+
+  resetInvoice();
+
+}
+
+
+// SHOW LIST
+
+function showInvoices(){
+
+  let table =
+    document.getElementById(
+      "invoiceList"
+    );
+
+  table.innerHTML = "";
+
+  invoices.forEach((invoice,index)=>{
+
+    table.innerHTML += `
+
+      <tr>
+
+        <td>${index + 1}</td>
+
+        <td>${invoice.invoiceNo}</td>
+
+        <td>${invoice.supplier}</td>
+
+        <td>${invoice.invoiceDate}</td>
+
+        <td>${invoice.netAmount}</td>
+
+        <td class="no-print">
+
+          <button
+            class="edit-btn"
+            onclick="editInvoice(${index})"
+          >
+            Edit
+          </button>
+
+          <button
+            class="delete-btn"
+            onclick="deleteInvoice(${index})"
+          >
+            Delete
+          </button>
+
+        </td>
+
+      </tr>
+
+    `;
+
+  });
+
+}
+
+
+// SEARCH
+
+function searchInvoiceList(){
+
+  let invoiceSearch =
+    document.getElementById(
+      "searchInvoice"
+    )
+    .value
+    .toLowerCase();
+
+  let supplierSearch =
+    document.getElementById(
+      "searchSupplier"
+    )
+    .value
+    .toLowerCase();
+
+  let filtered =
+    invoices.filter(invoice=>{
+
+      return (
+
+        invoice.invoiceNo
+        .toLowerCase()
+        .includes(invoiceSearch)
+
+        &&
+
+        invoice.supplier
+        .toLowerCase()
+        .includes(supplierSearch)
+
+      );
+
+    });
+
+  displayFilteredInvoices(filtered);
+
+}
+
+
+// DISPLAY FILTERED
+
+function displayFilteredInvoices(data){
+
+  let table =
+    document.getElementById(
+      "invoiceList"
+    );
+
+  table.innerHTML = "";
+
+  data.forEach((invoice,index)=>{
+
+    table.innerHTML += `
+
+      <tr>
+
+        <td>${index + 1}</td>
+
+        <td>${invoice.invoiceNo}</td>
+
+        <td>${invoice.supplier}</td>
+
+        <td>${invoice.invoiceDate}</td>
+
+        <td>${invoice.netAmount}</td>
+
+        <td class="no-print">
+
+          <button
+            class="edit-btn"
+            onclick="editInvoice(${invoices.indexOf(invoice)})"
+          >
+            Edit
+          </button>
+
+          <button
+            class="delete-btn"
+            onclick="deleteInvoice(${invoices.indexOf(invoice)})"
+          >
+            Delete
+          </button>
+
+        </td>
+
+      </tr>
+
+    `;
+
+  });
+
+}
+
+
+// EDIT
+
+function editInvoice(index){
+
+  let invoice =
+    invoices[index];
+
+  document.getElementById(
+    "supplier"
+  ).value = invoice.supplier;
+
+  document.getElementById(
+    "invoiceNo"
+  ).value = invoice.invoiceNo;
+
+  document.getElementById(
+    "invoiceDate"
+  ).value = invoice.invoiceDate;
+
+  document.getElementById(
+    "remarks"
+  ).value = invoice.remarks;
+
+  document.getElementById(
+    "amountTotal"
+  ).value = invoice.amountTotal;
+
+  document.getElementById(
+    "discountTotal"
+  ).value = invoice.discountTotal;
+
+  document.getElementById(
+    "otherCharge"
+  ).value = invoice.otherCharge;
+
+  document.getElementById(
+    "netAmount"
+  ).value = invoice.netAmount;
+
+  invoiceItems = invoice.items;
+
+  displayItems();
+
+  editIndex = index;
+
+}
+
+
+// DELETE
+
+function deleteInvoice(index){
+
+  if(confirm("Delete Invoice?")){
+
+    invoices.splice(index,1);
+
+    localStorage.setItem(
+
+      "purchaseInvoices",
+
+      JSON.stringify(invoices)
+
+    );
+
+    showInvoices();
+
+    generateInvoiceNo();
+
+  }
+
+}
+
+
+// RESET
+
+function resetInvoice(){
+
+  document.getElementById(
+    "supplier"
+  ).value = "";
+
+  document.getElementById(
+    "invoiceDate"
+  ).value = "";
+
+  document.getElementById(
+    "remarks"
+  ).value = "";
+
+  document.getElementById(
+    "amountTotal"
+  ).value = 0;
+
+  document.getElementById(
+    "discountTotal"
+  ).value = 0;
+
+  document.getElementById(
+    "otherCharge"
+  ).value = 0;
+
+  document.getElementById(
+    "netAmount"
+  ).value = "";
+
+  invoiceItems = [];
+
+  document.getElementById(
+    "invoiceTable"
+  ).innerHTML = "";
+
+  clearItemForm();
+
+  editIndex = -1;
+
+  generateInvoiceNo();
+
+}
+
+
+// CLEAR ITEM
+
+function clearItemForm(){
+
+  document.getElementById(
+    "itemName"
+  ).value = "";
+
+  document.getElementById(
+    "qty"
+  ).value = "";
+
+  document.getElementById(
+    "rate"
+  ).value = "";
+
+  document.getElementById(
+    "discount"
+  ).value = "";
+
+  document.getElementById(
+    "total"
+  ).value = "";
+
+}
+
+
+// LOAD PAGE
+
+generateInvoiceNo();
+
+showInvoices();
+
+calculateNetAmount();
+
+
+
+// Add print button to page
+
+
+
+
+// Add print button to page
+if (typeof addPrintButtonToPage !== 'undefined') addPrintButtonToPage('purchase invoice');
+
+</script>
+
+<script>
+function getCompanyInfoForPrint(){
+  try{return JSON.parse(localStorage.getItem('erp_company_info')||'null')||{}}catch(e){return{}}
+}
+function getCompanyPrintHeaderHtml(){
+  const info=getCompanyInfoForPrint();
+  const logo=info.logoDataUrl?`<img src="${info.logoDataUrl}" alt="Company Logo">`:'';
+  const name=info.companyName?`<div class="company-name">${info.companyName}</div>`:'';
+  const address=info.address?`<div class="company-address">${info.address}</div>`:'';
+  return `<div class="company-print-header-inner"><div class="left">${logo}</div><div class="center">${name}</div><div class="right">${address}</div></div>`;
+}
+function renderCompanyPrintHeader(){
+  const header=document.getElementById('companyPrintHeader');
+  if(header){header.innerHTML=getCompanyPrintHeaderHtml(); header.style.display='none';}
+}
+renderCompanyPrintHeader();
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Purchase Voucher</title>
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial;
+}
+
+body{
+  background:#f3f4f6;
+  padding:20px;
+}
+
+.container{
+  max-width:1500px;
+  margin:auto;
+}
+
+.card{
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  margin-bottom:20px;
+  box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+h1,
+h2{
+  margin-bottom:20px;
+  color:#111827;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:15px;
+  margin-bottom:15px;
+}
+
+input,
+select,
+textarea{
+  width:100%;
+  padding:12px;
+  border:1px solid #ccc;
+  border-radius:5px;
+}
+
+textarea{
+  resize:none;
+  height:80px;
+}
+
+button{
+  padding:10px 15px;
+  border:none;
+  border-radius:5px;
+  color:white;
+  cursor:pointer;
+  margin-right:5px;
+  margin-top:5px;
+}
+
+.new-btn{
+  background:#2563eb;
+}
+
+.save-btn{
+  background:green;
+}
+
+.edit-btn{
+  background:orange;
+}
+
+.delete-btn{
+  background:red;
+}
+
+.print-btn{
+  background:#9333ea;
+}
+
+.search-box{
+  margin-bottom:15px;
+}
+
+.search-box input{
+  max-width:400px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+table th,
+table td{
+  border:1px solid #ddd;
+  padding:10px;
+  text-align:left;
+}
+
+table th{
+  background:#111827;
+  color:white;
+}
+
+.no-data{
+  text-align:center;
+  color:red;
+  font-weight:bold;
+}
+
+.company-print-header{
+  display:none;
+  width:100%;
+  border-bottom:2px solid #000;
+  padding-bottom:10px;
+  margin-bottom:15px;
+}
+
+.company-print-header-inner{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.company-print-header .left,
+.company-print-header .center,
+.company-print-header .right{
+  width:33%;
+}
+
+.company-print-header .left{
+  text-align:left;
+}
+
+.company-print-header .center{
+  text-align:center;
+}
+
+.company-print-header .right{
+  text-align:right;
+}
+
+.company-print-header img{
+  max-height:70px;
+}
+
+.company-print-header .company-name{
+  font-size:18px;
+  font-weight:bold;
+}
+
+.company-print-header .company-address{
+  font-size:13px;
+  color:#444;
+  white-space:pre-wrap;
+}
+
+@media print{
+  .company-print-header{
+    display:block !important;
+  }
+
+  body{
+    padding:0 !important;
+    background:transparent !important;
+  }
+
+  .card{
+    display:none !important;
+  }
+
+  .card:last-of-type,
+  .company-print-header{
+    display:block !important;
+  }
+
+  .card:last-of-type .search-box,
+  .card:last-of-type .print-btn,
+  .company-print-header .company-print-title{
+    display:none !important;
+  }
+
+  button,
+  .form-grid,
+  .new-btn,
+  .save-btn,
+  .edit-btn,
+  .delete-btn{
+    display:none !important;
+  }
+
+  #printSection th:last-child,
+  #printSection td:last-child{
+    display:none !important;
+  }
+
+  #printSection{
+    position:static !important;
+    left:auto !important;
+    top:auto !important;
+    width:100% !important;
+  }
+}
+
+</style>
+</head>
+<body>
+
+<div class="company-print-header" id="companyPrintHeader"></div>
+
+<div class="container">
+
+  <!-- HEADER -->
+
+  <div class="card">
+
+    <h1>Purchase Payment Voucher</h1>
+
+    <button
+      class="new-btn"
+      onclick="newVoucher()"
+    >
+      New Purchase Payment Voucher
+    </button>
+
+  </div>
+
+  <!-- FORM -->
+
+  <div class="card">
+
+    <h2>Voucher Form</h2>
+
+    <div class="form-grid">
+
+      <input
+        type="date"
+        id="voucherDate"
+      >
+
+      <input
+        type="text"
+        id="voucherNo"
+        placeholder="Voucher Number"
+        readonly
+      >
+
+      <input
+        type="text"
+        id="supplierName"
+        placeholder="Supplier Name"
+      >
+
+      <input
+        type="number"
+        id="remainingBalance"
+        placeholder="Remaining Balance"
+      >
+
+      <select id="paymentType">
+
+        <option value="Cash">
+          Cash
+        </option>
+
+        <option value="Bank">
+          Bank
+        </option>
+
+      </select>
+
+    </div>
+
+  </div>
+
+  <!-- PAYMENT FORM -->
+
+  <div class="card">
+
+    <h2>Payment Details</h2>
+
+    <div class="form-grid">
+
+      <input
+        type="text"
+        id="accountName"
+        placeholder="Account Name"
+      >
+
+      <input
+        type="number"
+        id="amount"
+        placeholder="Amount"
+      >
+
+    </div>
+
+    <textarea
+      id="remarks"
+      placeholder="Remarks"
+    ></textarea>
+
+    <br>
+
+    <button
+      class="save-btn"
+      onclick="saveVoucher()"
+    >
+      Save Voucher
+    </button>
+
+  </div>
+
+  <!-- LIST -->
+
+  <div class="card">
+
+    <h2>Voucher List</h2>
+
+    <div class="search-box">
+
+      <input
+        type="text"
+        id="searchVoucher"
+        placeholder="Search Voucher / Supplier / Account"
+        onkeyup="searchVoucherList()"
+      >
+
+      <button
+        class="print-btn"
+        onclick="printSearchList()"
+      >
+        Print Search List
+      </button>
+
+    </div>
+
+    <div id="printSection">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>ID</th>
+            <th>Date</th>
+            <th>Voucher No</th>
+            <th>Supplier</th>
+            <th>Balance</th>
+            <th>Payment Type</th>
+            <th>Account</th>
+            <th>Amount</th>
+            <th>Remarks</th>
+            <th>Action</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody id="voucherTable">
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+let vouchers =
+JSON.parse(
+  localStorage.getItem(
+    "purchasePaymentVouchers"
+  )
+) || [];
+
+let editIndex = -1;
+
+
+// AUTO VOUCHER NUMBER
+
+function generateVoucherNumber(){
+
+  let lastNumber =
+    localStorage.getItem(
+      "lastVoucherNumber"
+    );
+
+  if(lastNumber === null){
+
+    lastNumber = 1000;
+
+  }else{
+
+    lastNumber = Number(lastNumber) + 1;
+
+  }
+
+  localStorage.setItem(
+    "lastVoucherNumber",
+    lastNumber
+  );
+
+  document.getElementById(
+    "voucherNo"
+  ).value =
+    "PV-" + lastNumber;
+
+}
+
+
+// SAVE VOUCHER
+
+function saveVoucher(){
+
+  let voucherData = {
+
+    date:
+      document.getElementById(
+        "voucherDate"
+      ).value,
+
+    voucherNo:
+      document.getElementById(
+        "voucherNo"
+      ).value,
+
+    supplier:
+      document.getElementById(
+        "supplierName"
+      ).value,
+
+    balance:
+      document.getElementById(
+        "remainingBalance"
+      ).value,
+
+    paymentType:
+      document.getElementById(
+        "paymentType"
+      ).value,
+
+    account:
+      document.getElementById(
+        "accountName"
+      ).value,
+
+    amount:
+      document.getElementById(
+        "amount"
+      ).value,
+
+    remarks:
+      document.getElementById(
+        "remarks"
+      ).value
+
+  };
+
+  if(
+    voucherData.date === "" ||
+    voucherData.supplier === "" ||
+    voucherData.account === "" ||
+    voucherData.amount === ""
+  ){
+
+    alert("Please Fill All Fields");
+
+    return;
+
+  }
+
+  if(editIndex === -1){
+
+    vouchers.push(voucherData);
+
+  }else{
+
+    vouchers[editIndex] = voucherData;
+
+    editIndex = -1;
+
+  }
+
+  localStorage.setItem(
+    "purchasePaymentVouchers",
+    JSON.stringify(vouchers)
+  );
+
+  displayVoucherList(vouchers);
+
+  alert("Voucher Saved Successfully");
+
+  resetForm();
+
+}
+
+
+// DISPLAY LIST
+
+function displayVoucherList(data){
+
+  let table =
+    document.getElementById(
+      "voucherTable"
+    );
+
+  table.innerHTML = "";
+
+  if(data.length === 0){
+
+    table.innerHTML = `
+
+      <tr>
+
+        <td colspan="10" class="no-data">
+          No Voucher Found
+        </td>
+
+      </tr>
+
+    `;
+
+    return;
+
+  }
+
+  data.forEach((voucher,index)=>{
+
+    table.innerHTML += `
+
+      <tr>
+
+        <td>${index + 1}</td>
+
+        <td>${voucher.date}</td>
+
+        <td>${voucher.voucherNo}</td>
+
+        <td>${voucher.supplier}</td>
+
+        <td>${voucher.balance}</td>
+
+        <td>${voucher.paymentType}</td>
+
+        <td>${voucher.account}</td>
+
+        <td>${voucher.amount}</td>
+
+        <td>${voucher.remarks}</td>
+
+        <td>
+
+          <button
+            class="edit-btn"
+            onclick="editVoucher(${index})"
+          >
+            Edit
+          </button>
+
+          <button
+            class="delete-btn"
+            onclick="deleteVoucher(${index})"
+          >
+            Delete
+          </button>
+
+        </td>
+
+      </tr>
+
+    `;
+
+  });
+
+}
+
+
+// EDIT
+
+function editVoucher(index){
+
+  let voucher = vouchers[index];
+
+  document.getElementById(
+    "voucherDate"
+  ).value = voucher.date;
+
+  document.getElementById(
+    "voucherNo"
+  ).value = voucher.voucherNo;
+
+  document.getElementById(
+    "supplierName"
+  ).value = voucher.supplier;
+
+  document.getElementById(
+    "remainingBalance"
+  ).value = voucher.balance;
+
+  document.getElementById(
+    "paymentType"
+  ).value = voucher.paymentType;
+
+  document.getElementById(
+    "accountName"
+  ).value = voucher.account;
+
+  document.getElementById(
+    "amount"
+  ).value = voucher.amount;
+
+  document.getElementById(
+    "remarks"
+  ).value = voucher.remarks;
+
+  editIndex = index;
+
+}
+
+
+// DELETE
+
+function deleteVoucher(index){
+
+  if(confirm("Delete Voucher?")){
+
+    vouchers.splice(index,1);
+
+    localStorage.setItem(
+      "purchasePaymentVouchers",
+      JSON.stringify(vouchers)
+    );
+
+    displayVoucherList(vouchers);
+
+  }
+
+}
+
+
+// SEARCH
+
+function searchVoucherList(){
+
+  let value =
+    document.getElementById(
+      "searchVoucher"
+    )
+    .value
+    .toLowerCase();
+
+  let filtered =
+    vouchers.filter(voucher=>
+
+      voucher.voucherNo
+      .toLowerCase()
+      .includes(value)
+
+      ||
+
+      voucher.supplier
+      .toLowerCase()
+      .includes(value)
+
+      ||
+
+      voucher.account
+      .toLowerCase()
+      .includes(value)
+
+    );
+
+  displayVoucherList(filtered);
+
+}
+
+
+// PRINT SEARCH LIST
+
+function printSearchList(){
+
+  window.print();
+
+}
+
+
+// RESET FORM
+
+function resetForm(){
+
+  document.getElementById(
+    "voucherDate"
+  ).value = "";
+
+  document.getElementById(
+    "supplierName"
+  ).value = "";
+
+  document.getElementById(
+    "remainingBalance"
+  ).value = "";
+
+  document.getElementById(
+    "paymentType"
+  ).value = "Cash";
+
+  document.getElementById(
+    "accountName"
+  ).value = "";
+
+  document.getElementById(
+    "amount"
+  ).value = "";
+
+  document.getElementById(
+    "remarks"
+  ).value = "";
+
+  editIndex = -1;
+
+  generateVoucherNumber();
+
+}
+
+
+// NEW VOUCHER
+
+function newVoucher(){
+
+  resetForm();
+
+}
+
+
+// PAGE LOAD
+
+generateVoucherNumber();
+
+displayVoucherList(vouchers);
+
+
+
+// Add print button to page
+addPrintButtonToPage('purchase voucher');
+
+</script>
+
+<script>
+function getCompanyInfoForPrint(){
+  try{return JSON.parse(localStorage.getItem('erp_company_info')||'null')||{}}catch(e){return{}}
+}
+function getCompanyPrintHeaderHtml(){
+  const info=getCompanyInfoForPrint();
+  const logo=info.logoDataUrl?`<img src="${info.logoDataUrl}" alt="Company Logo">`:'';
+  const name=info.companyName?`<div class="company-name">${info.companyName}</div>`:'';
+  const address=info.address?`<div class="company-address">${info.address}</div>`:'';
+  return `<div class="company-print-header-inner"><div class="left">${logo}</div><div class="center">${name}</div><div class="right">${address}</div></div>`;
+}
+function renderCompanyPrintHeader(){
+  const header=document.getElementById('companyPrintHeader');
+  if(header){header.innerHTML=getCompanyPrintHeaderHtml(); header.style.display='none';}
+}
+renderCompanyPrintHeader();
+</script>
+
+</body>
+</html>
+

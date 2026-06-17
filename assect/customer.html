@@ -1,0 +1,986 @@
+<!-- COMPLETE CUSTOMER MANAGEMENT WITH NUMBER WISE CUSTOMER & SUB CUSTOMER LIST -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Customer Management</title>
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial;
+}
+
+body{
+  background:#f4f6f9;
+  padding:20px;
+}
+
+.container{
+  max-width:1500px;
+  margin:auto;
+}
+
+.card{
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  margin-bottom:20px;
+  box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+h1,h2{
+  margin-bottom:20px;
+  color:#111827;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:
+  repeat(auto-fit,minmax(220px,1fr));
+  gap:15px;
+  margin-bottom:15px;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  border:1px solid #ccc;
+  border-radius:5px;
+}
+
+button{
+  padding:10px 15px;
+  border:none;
+  border-radius:5px;
+  color:white;
+  cursor:pointer;
+  margin-right:5px;
+}
+
+.add-btn{
+  background:#2563eb;
+}
+
+.save-btn{
+  background:green;
+}
+
+.reset-btn{
+  background:red;
+}
+
+.edit-btn{
+  background:orange;
+}
+
+.delete-btn{
+  background:#dc2626;
+}
+
+.search-btn{
+  background:#9333ea;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+table th,
+table td{
+  border:1px solid #ddd;
+  padding:12px;
+  text-align:left;
+}
+
+table th{
+  background:#111827;
+  color:white;
+}
+
+
+/* CUSTOMER BAR */
+
+.customer-bar{
+  background:#111827;
+  color:white;
+  padding:20px;
+  border-radius:10px;
+  margin-bottom:20px;
+}
+
+.customer-main{
+  background:#1f2937;
+  padding:15px;
+  border-radius:8px;
+  margin-bottom:15px;
+}
+
+.customer-title{
+  font-size:18px;
+  font-weight:bold;
+  margin-bottom:10px;
+}
+
+.sub-list{
+  margin-left:20px;
+  padding-left:15px;
+  border-left:2px solid #4b5563;
+}
+
+.sub-item{
+  padding:6px 0;
+  color:#d1d5db;
+  font-size:14px;
+}
+
+.no-sub{
+  color:#9ca3af;
+  font-style:italic;
+}
+
+/* SERVER STATUS */
+.server-status {
+  background: #d1d5db;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 5px;
+  display: inline-block;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.company-print-header {
+  display: none;
+  margin-bottom: 20px;
+  padding: 12px;
+  /* border: 1px solid #ddd;
+  border-radius: 10px; */
+  background: white;
+  border-bottom:2px solid #000000; 
+}
+
+.company-print-header .company-print-header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.company-print-header .header-part {
+  flex: 1;
+  min-width: 0;
+}
+
+.company-print-header .header-part.left {
+  text-align: left;
+}
+
+.company-print-header .header-part.center {
+  text-align: center;
+}
+
+.company-print-header .header-part.right {
+  text-align: right;
+}
+
+.company-print-header img {
+  max-height: 60px;
+  max-width: 100%;
+  display: inline-block;
+}
+
+.company-print-header .company-name {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.company-print-header .company-address {
+  font-size: 14px;
+}
+
+@media print {
+  .company-print-header {
+    display: block !important;
+  }
+
+  #serverConnectionStatus,
+  .customer-bar,
+  .form-grid,
+  h1:not(.customer-list-title),
+  .card:not(#customerListCard),
+  button,
+  .edit-btn,
+  .delete-btn,
+  #customerBarList,
+  .customer-main,
+  .sub-list,
+  .sub-item,
+  .no-sub {
+    display: none !important;
+  }
+
+  #customerListCard {
+    display: block !important;
+    page-break-after: avoid;
+  }
+
+  #customerListCard table th:last-child,
+  #customerListCard table td:last-child {
+    display: none !important;
+  }
+}
+
+</style>
+
+
+
+</head>
+
+<body>
+
+<div class="container">
+  <div class="company-print-header" id="companyPrintHeader"></div>
+
+  <div class="server-status" id="serverConnectionStatus">🔄 Checking Server...</div>
+
+  <!-- CUSTOMER BAR -->
+<!-- 
+  <div class="customer-bar">
+
+    <h2>Customer & Sub Customer List</h2>
+
+    <div id="customerBarList"></div>
+
+  </div>
+
+  <!-- CUSTOMER FORM
+
+  <div class="card"> -->
+
+    <h1>Customer Form</h1>
+
+    <div class="form-grid">
+
+      <input
+        type="text"
+        id="customerName"
+        placeholder="Customer Name"
+      >
+
+      <input
+        type="text"
+        id="subCustomer"
+        placeholder="Sub Customer (Comma Separated)"
+      >
+
+      <input
+        type="text"
+        id="contact"
+        placeholder="Contact Number"
+      >
+
+      <input
+        type="text"
+        id="address"
+        placeholder="Address"
+      >
+
+      <input
+        type="number"
+        id="opening"
+        placeholder="Opening Balance"
+      >
+
+    </div>
+
+  </div>
+
+  <!-- ITEM SECTION -->
+
+  <div class="card">
+
+    <h1>Items Section</h1>
+
+    <div class="form-grid">
+
+      <input
+        type="text"
+        id="itemName"
+        placeholder="Item Name"
+      >
+
+      <input
+        type="number"
+        id="discount"
+        placeholder="Discount"
+      >
+
+    </div>
+
+    <button
+      class="add-btn"
+      onclick="addItem()"
+    >
+      Add Item
+    </button>
+
+  </div>
+
+  <!-- ITEM TABLE -->
+
+  <div class="card">
+
+    <h2>Items List</h2>
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>ID</th>
+          <th>Item Name</th>
+          <th>Discount</th>
+          <th>Action</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody id="itemTable">
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+  <!-- SAVE BUTTONS -->
+
+  <div class="card">
+
+    <button
+      class="save-btn"
+      onclick="saveCustomer()"
+    >
+      Save Customer
+    </button>
+
+    <button
+      class="reset-btn"
+      onclick="resetForm()"
+    >
+      Reset
+    </button>
+
+    <button
+      class="search-btn"
+      onclick="window.print()"
+    >
+      Print
+    </button>
+
+  </div>
+
+  <!-- SEARCH BAR -->
+
+  <div class="card">
+
+    <h1>Search Customer</h1>
+
+    <div class="form-grid">
+
+      <input
+        type="text"
+        id="searchCustomer"
+        placeholder="Search Customer"
+        onkeyup="searchCustomer()"
+      >
+
+      <input
+        type="text"
+        id="searchSubCustomer"
+        placeholder="Search Sub Customer"
+        onkeyup="searchCustomer()"
+      >
+
+      <input
+        type="text"
+        id="searchContact"
+        placeholder="Search Contact"
+        onkeyup="searchCustomer()"
+      >
+
+      <input
+        type="text"
+        id="searchItem"
+        placeholder="Search Item"
+        onkeyup="searchCustomer()"
+      >
+
+    </div>
+
+  </div>
+
+  <!-- CUSTOMER TABLE -->
+
+  <div class="card" id="customerListCard">
+
+    <h1 class="customer-list-title">Customer List</h1>
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>ID</th>
+          <th>Customer</th>
+          <th>Sub Customer</th>
+          <th>Contact</th>
+          <th>Address</th>
+          <th>Opening</th>
+          <th>Items</th>
+          <th>Action</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody id="customerTable">
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+<script>
+
+let customers =
+  JSON.parse(
+    localStorage.getItem("customers")
+  ) || [];
+
+let items = [];
+
+let editIndex = -1;
+
+
+// ADD ITEM
+
+function addItem(){
+
+  let itemName =
+    document.getElementById("itemName")
+    .value;
+
+  let discount =
+    document.getElementById("discount")
+    .value;
+
+  if(itemName === ""){
+
+    alert("Enter Item Name");
+
+    return;
+  }
+
+  items.push({
+
+    itemName,
+    discount
+
+  });
+
+  displayItems();
+
+  document.getElementById("itemName")
+  .value = "";
+
+  document.getElementById("discount")
+  .value = "";
+
+}
+
+
+// DISPLAY ITEMS
+
+function displayItems(){
+
+  let table =
+    document.getElementById("itemTable");
+
+  table.innerHTML = "";
+
+  items.forEach((item,index)=>{
+
+    table.innerHTML += `
+
+      <tr>
+
+        <td>${index + 1}</td>
+
+        <td>${item.itemName}</td>
+
+        <td>${item.discount}</td>
+
+        <td>
+
+          <button
+            class="delete-btn"
+            onclick="deleteItem(${index})"
+          >
+            Delete
+          </button>
+
+        </td>
+
+      </tr>
+
+    `;
+  });
+
+}
+
+
+// DELETE ITEM
+
+function deleteItem(index){
+
+  items.splice(index,1);
+
+  displayItems();
+
+}
+
+
+// SAVE CUSTOMER
+
+function saveCustomer(){
+
+  let customerName =
+    document.getElementById("customerName")
+    .value;
+
+  let subCustomer =
+    document.getElementById("subCustomer")
+    .value;
+
+  let contact =
+    document.getElementById("contact")
+    .value;
+
+  let address =
+    document.getElementById("address")
+    .value;
+
+  let opening =
+    document.getElementById("opening")
+    .value;
+
+  if(customerName === ""){
+
+    alert("Enter Customer Name");
+
+    return;
+  }
+
+  let customerData = {
+
+    customerName,
+    subCustomer,
+    contact,
+    address,
+    opening,
+    items
+
+  };
+
+  if(editIndex === -1){
+
+    customers.push(customerData);
+
+  }else{
+
+    customers[editIndex] =
+      customerData;
+
+    editIndex = -1;
+
+  }
+
+  localStorage.setItem(
+    "customers",
+    JSON.stringify(customers)
+  );
+
+  // Auto-sync to server
+  DBConnector.saveData(customerData, 'customer');
+
+  displayCustomers();
+
+  displayCustomerBar();
+
+  resetForm();
+
+}
+
+
+// DISPLAY CUSTOMER TABLE
+
+function displayCustomers(data = customers){
+
+  let table =
+    document.getElementById("customerTable");
+
+  table.innerHTML = "";
+
+  data.forEach((customer,index)=>{
+
+    let itemNames =
+      customer.items.map(item=>
+
+        item.itemName
+
+      ).join(", ");
+
+    table.innerHTML += `
+
+      <tr>
+
+        <td>${index + 1}</td>
+
+        <td>${customer.customerName}</td>
+
+        <td>${customer.subCustomer}</td>
+
+        <td>${customer.contact}</td>
+
+        <td>${customer.address}</td>
+
+        <td>${customer.opening}</td>
+
+        <td>${itemNames}</td>
+
+        <td>
+
+          <button
+            class="edit-btn"
+            onclick="editCustomer(${index})"
+          >
+            Edit
+          </button>
+
+          <button
+            class="delete-btn"
+            onclick="deleteCustomer(${index})"
+          >
+            Delete
+          </button>
+
+        </td>
+
+      </tr>
+
+    `;
+  });
+
+}
+
+
+// CUSTOMER BAR DISPLAY
+
+function displayCustomerBar(){
+
+  let bar =
+    document.getElementById(
+      "customerBarList"
+    );
+
+  bar.innerHTML = "";
+
+  customers.forEach((customer,index)=>{
+
+    let subCustomerHTML = "";
+
+    if(
+      customer.subCustomer.trim() !== ""
+    ){
+
+      let subCustomers =
+        customer.subCustomer.split(",");
+
+      subCustomers.forEach((sub,subIndex)=>{
+
+        subCustomerHTML += `
+
+          <div class="sub-item">
+
+            ${index + 1}.${subIndex + 1}
+            ➜
+            ${sub.trim()}
+
+          </div>
+
+        `;
+      });
+
+    }
+
+    bar.innerHTML += `
+
+      <div class="customer-main">
+
+        <div class="customer-title">
+
+          ${index + 1}.
+          ${customer.customerName}
+
+        </div>
+
+        ${
+          customer.subCustomer.trim() !== ""
+
+          ?
+
+          `<div class="sub-list">
+
+            ${subCustomerHTML}
+
+          </div>`
+
+          :
+
+          `<div class="sub-list">
+
+            <div class="sub-item no-sub">
+
+              No Sub Customer
+
+            </div>
+
+          </div>`
+
+        }
+
+      </div>
+
+    `;
+  });
+
+}
+
+
+// SEARCH CUSTOMER
+
+function searchCustomer(){
+
+  let customerSearch =
+    document.getElementById("searchCustomer")
+    .value
+    .toLowerCase();
+
+  let subCustomerSearch =
+    document.getElementById("searchSubCustomer")
+    .value
+    .toLowerCase();
+
+  let contactSearch =
+    document.getElementById("searchContact")
+    .value
+    .toLowerCase();
+
+  let itemSearch =
+    document.getElementById("searchItem")
+    .value
+    .toLowerCase();
+
+  let filtered =
+    customers.filter(customer=>{
+
+      let itemMatch =
+        customer.items.some(item=>
+
+          item.itemName
+          .toLowerCase()
+          .includes(itemSearch)
+
+        );
+
+      return (
+
+        customer.customerName
+        .toLowerCase()
+        .includes(customerSearch)
+
+        &&
+
+        customer.subCustomer
+        .toLowerCase()
+        .includes(subCustomerSearch)
+
+        &&
+
+        customer.contact
+        .toLowerCase()
+        .includes(contactSearch)
+
+        &&
+
+        (
+          itemSearch === ""
+          ? true
+          : itemMatch
+        )
+
+      );
+
+    });
+
+  displayCustomers(filtered);
+
+}
+
+
+// EDIT CUSTOMER
+
+function editCustomer(index){
+
+  let customer =
+    customers[index];
+
+  document.getElementById("customerName")
+  .value = customer.customerName;
+
+  document.getElementById("subCustomer")
+  .value = customer.subCustomer;
+
+  document.getElementById("contact")
+  .value = customer.contact;
+
+  document.getElementById("address")
+  .value = customer.address;
+
+  document.getElementById("opening")
+  .value = customer.opening;
+
+  items = customer.items;
+
+  displayItems();
+
+  editIndex = index;
+
+}
+
+
+// DELETE CUSTOMER
+
+function deleteCustomer(index){
+
+  if(confirm("Delete Customer?")){
+
+    customers.splice(index,1);
+
+    localStorage.setItem(
+      "customers",
+      JSON.stringify(customers)
+    );
+
+    displayCustomers();
+
+    displayCustomerBar();
+
+  }
+
+}
+
+
+// RESET FORM
+
+function resetForm(){
+
+  document.getElementById("customerName")
+  .value = "";
+
+  document.getElementById("subCustomer")
+  .value = "";
+
+  document.getElementById("contact")
+  .value = "";
+
+  document.getElementById("address")
+  .value = "";
+
+  document.getElementById("opening")
+  .value = "";
+
+  document.getElementById("itemName")
+  .value = "";
+
+  document.getElementById("discount")
+  .value = "";
+
+  items = [];
+
+  displayItems();
+
+}
+
+
+// LOAD DATA
+
+displayCustomers();
+
+displayCustomerBar();
+
+// Add print button to page
+addPrintButtonToPage('Customer Management');
+
+</script>
+<script>
+/* COMPANY PRINT HEADER */
+function getCompanyInfoForPrint() {
+  try {
+    return JSON.parse(localStorage.getItem('erp_company_info') || 'null') || {};
+  } catch (error) {
+    return {};
+  }
+}
+
+function getCompanyPrintHeaderHtml(title) {
+  const info = getCompanyInfoForPrint();
+  const logo = info.logoDataUrl ? `<img src="${info.logoDataUrl}" alt="Company Logo">` : '';
+  const name = info.companyName ? `<div class="company-name">${info.companyName}</div>` : '';
+  const address = info.address ? `<div class="company-address">${info.address}</div>` : '';
+  return `\n    <div class="company-print-header-inner">\n      <div class="header-part left">${logo}</div>\n      <div class="header-part center">${name}</div>\n      <div class="header-part right">${address}</div>\n    </div>\n  `;
+}
+
+function renderCompanyPrintHeader() {
+  const header = document.getElementById('companyPrintHeader');
+  if (header) {
+    header.innerHTML = getCompanyPrintHeaderHtml();
+    header.style.display = 'none';
+  }
+}
+
+renderCompanyPrintHeader();
+</script>
+
+<!-- DATABASE SERVER CONNECTOR -->
+<script src="http://localhost:5000/database-connector.js"></script>
+
+</body>
+</html>

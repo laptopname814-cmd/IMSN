@@ -1,0 +1,1276 @@
+﻿<!-- ===================================
+     COMPLETE SALES SYSTEM
+     HTML CSS JAVASCRIPT
+=================================== -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
+
+<title>
+Sales Invoice System
+</title>
+
+<style>
+
+/* ===================================
+   GLOBAL
+=================================== */
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial;
+}
+
+body{
+  background:#f3f4f6;
+  padding:20px;
+}
+
+.container{
+  max-width:1700px;
+  margin:auto;
+}
+
+.card{
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  margin-bottom:20px;
+  box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+h1{
+  margin-bottom:20px;
+  color:#111827;
+}
+
+/* ===================================
+   FORM
+=================================== */
+
+.form-grid{
+  display:grid;
+  grid-template-columns:
+  repeat(auto-fit,minmax(220px,1fr));
+  gap:15px;
+  margin-bottom:20px;
+}
+
+input,
+select{
+  width:100%;
+  padding:12px;
+  border:1px solid #ccc;
+  border-radius:5px;
+}
+
+/* ===================================
+   BUTTONS
+=================================== */
+
+button{
+  padding:12px 15px;
+  border:none;
+  border-radius:5px;
+  color:white;
+  cursor:pointer;
+  margin-right:5px;
+}
+
+.save-btn{
+  background:#16a34a;
+}
+
+.edit-btn{
+  background:#d97706;
+}
+
+.delete-btn{
+  background:#dc2626;
+}
+
+.print-btn{
+  background:#7c3aed;
+}
+
+/* ===================================
+   CHECKBOX
+=================================== */
+
+.checkbox-box{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.checkbox-box input{
+  width:auto;
+}
+
+/* ===================================
+   TABLE
+=================================== */
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+table th,
+table td{
+  border:1px solid #ddd;
+  padding:10px;
+  text-align:left;
+}
+
+table th{
+  background:#111827;
+  color:white;
+}
+
+table tr:nth-child(even){
+  background:#f9fafb;
+}
+
+/* ===================================
+   SEARCH
+=================================== */
+
+.search-grid{
+  display:grid;
+  grid-template-columns:
+  repeat(auto-fit,minmax(220px,1fr));
+  gap:15px;
+  margin-bottom:20px;
+}
+
+/* ===================================
+   PRINT
+=================================== */
+
+#printArea{
+  display:none;
+}
+
+@media print{
+
+  body *{
+    visibility:hidden;
+  }
+
+  #companyPrintHeader,
+  #companyPrintHeader *,
+  #printArea,
+  #printArea *{
+    visibility:visible;
+  }
+
+  #companyPrintHeader{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    background:white;
+    padding:15px 20px;
+    display:block !important;
+    z-index:999;
+  }
+
+  #printArea{
+    position:absolute;
+    left:0;
+    top:120px;
+    width:100%;
+    background:white;
+    padding:20px;
+    display:block;
+  }
+
+}
+
+.company-print-header{
+  display:none;
+  width:100%;
+  border-bottom:2px solid #000;
+  padding-bottom:10px;
+  margin-bottom:15px;
+}
+
+.company-print-header-inner{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.company-print-header .left,
+.company-print-header .center,
+.company-print-header .right{
+  width:33%;
+}
+
+.company-print-header .left{
+  text-align:left;
+}
+
+.company-print-header .center{
+  text-align:center;
+}
+
+.company-print-header .right{
+  text-align:right;
+}
+
+.company-print-header img{
+  max-height:70px;
+}
+
+.company-print-header .company-name{
+  font-size:18px;
+  font-weight:bold;
+}
+
+.company-print-header .company-address{
+  font-size:13px;
+  color:#444;
+  white-space:pre-wrap;
+}
+
+/* ===================================
+   RESPONSIVE
+=================================== */
+
+@media(max-width:768px){
+
+  table{
+    display:block;
+    overflow:auto;
+  }
+
+}
+
+</style>
+
+
+</head>
+
+<body>
+
+<div class="company-print-header" id="companyPrintHeader"></div>
+
+<div class="container">
+
+  <!-- ===================================
+       SALES FORM
+  =================================== -->
+
+  <div class="card">
+
+    <h1>
+      Sales Invoice System
+    </h1>
+
+    <div class="form-grid">
+
+      <!-- INVOICE NO -->
+
+      <input
+        type="text"
+        id="invoiceNo"
+        placeholder="Invoice Number"
+        readonly
+      >
+
+      <!-- CUSTOMER -->
+
+      <input
+        type="text"
+        id="customerName"
+        placeholder="Customer Name"
+      >
+
+      <!-- SUB CUSTOMER -->
+
+      <input
+        type="text"
+        id="subCustomer"
+        placeholder="Sub Customer"
+      >
+
+      <!-- PRODUCT -->
+
+      <select id="itemName">
+
+        <option value="">
+          Select Product
+        </option>
+
+      </select>
+
+      <!-- UNIT -->
+
+      <input
+        type="text"
+        id="unit"
+        placeholder="Unit"
+        readonly
+      >
+
+      <!-- QUANTITY -->
+
+      <input
+        type="number"
+        id="qty"
+        placeholder="Quantity"
+        onkeyup="calculateAmount()"
+      >
+
+      <!-- RATE -->
+
+      <input
+        type="number"
+        id="rate"
+        placeholder="Rate"
+        onkeyup="calculateAmount()"
+      >
+
+      <!-- AMOUNT -->
+
+      <input
+        type="number"
+        id="amount"
+        placeholder="Amount"
+        readonly
+      >
+
+      <!-- DATE -->
+
+      <input
+        type="date"
+        id="invoiceDate"
+      >
+
+    </div>
+
+    <!-- ===================================
+         SUB CUSTOMER TICK BOX
+    =================================== -->
+
+    <div class="checkbox-box">
+
+      <input
+        type="checkbox"
+        id="showSubCustomer"
+      >
+
+      <label for="showSubCustomer">
+        Add Sub Customer
+      </label>
+
+    </div>
+
+    <!-- SAVE -->
+
+    <button
+      class="save-btn"
+      onclick="saveInvoice()"
+    >
+      Save Invoice
+    </button>
+
+  </div>
+
+  <!-- ===================================
+       SEARCH AREA
+  =================================== -->
+
+  <div class="card">
+
+    <div class="search-grid">
+
+      <!-- SEARCH -->
+
+      <input
+        type="text"
+        id="searchBox"
+        placeholder="Search Invoice / Customer / Product"
+        onkeyup="displayInvoices()"
+      >
+
+      <!-- PRODUCT FILTER -->
+
+      <select
+        id="productFilter"
+        onchange="displayInvoices()"
+      >
+
+        <option value="">
+          All Products
+        </option>
+
+      </select>
+
+      <!-- FROM DATE -->
+
+      <input
+        type="date"
+        id="fromDate"
+        onchange="displayInvoices()"
+      >
+
+      <!-- TO DATE -->
+
+      <input
+        type="date"
+        id="toDate"
+        onchange="displayInvoices()"
+      >
+
+      <!-- PRINT -->
+
+      <button
+        class="print-btn"
+        onclick="printInvoices()"
+      >
+        Print List
+      </button>
+
+    </div>
+
+    <!-- ===================================
+         TABLE
+    =================================== -->
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>Sr No</th>
+          <th>Invoice No</th>
+          <th>Customer</th>
+          <th>Sub Customer</th>
+          <th>Item Name</th>
+          <th>Unit</th>
+          <th>Qty</th>
+          <th>Rate</th>
+          <th>Amount</th>
+          <th>Date</th>
+          <th>Action</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody id="invoiceTable">
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+<!-- ===================================
+     PRINT AREA
+=================================== -->
+
+<div id="printArea"></div>
+
+<script>
+
+/* ===================================
+   LOCAL STORAGE
+=================================== */
+
+let products =
+JSON.parse(
+  localStorage.getItem(
+    "products"
+  )
+) || [];
+
+let salesInvoices =
+JSON.parse(
+  localStorage.getItem(
+    "salesInvoices"
+  )
+) || [];
+
+/* ===================================
+   DEMO PRODUCTS
+=================================== */
+
+if(products.length === 0){
+
+  products = [
+
+    {
+      productName:"Biscuits",
+      unit:"Packet",
+      saleRate:50
+    },
+
+    {
+      productName:"Juice",
+      unit:"Box",
+      saleRate:120
+    },
+
+    {
+      productName:"Oil",
+      unit:"Litre",
+      saleRate:350
+    }
+
+  ];
+
+  localStorage.setItem(
+    "products",
+    JSON.stringify(products)
+  );
+
+}
+
+/* ===================================
+   AUTO INVOICE NUMBER
+=================================== */
+
+function generateInvoiceNo(){
+
+  let lastNo =
+    localStorage.getItem(
+      "lastInvoiceNo"
+    );
+
+  if(!lastNo){
+
+    lastNo = 1000;
+
+  }
+
+  lastNo = Number(lastNo) + 1;
+
+  localStorage.setItem(
+    "lastInvoiceNo",
+    lastNo
+  );
+
+  document.getElementById(
+    "invoiceNo"
+  ).value =
+    "INV-" + lastNo;
+
+}
+
+/* ===================================
+   LOAD PRODUCTS
+=================================== */
+
+function loadProducts(){
+
+  let productSelect =
+    document.getElementById(
+      "itemName"
+    );
+
+  let filterSelect =
+    document.getElementById(
+      "productFilter"
+    );
+
+  products.forEach(product=>{
+
+    productSelect.innerHTML += `
+
+      <option
+        value="${product.productName}"
+        data-unit="${product.unit}"
+        data-rate="${product.saleRate}"
+      >
+
+        ${product.productName}
+
+      </option>
+
+    `;
+
+    filterSelect.innerHTML += `
+
+      <option value="${product.productName}">
+        ${product.productName}
+      </option>
+
+    `;
+
+  });
+
+}
+
+/* ===================================
+   PRODUCT SELECT
+=================================== */
+
+document.addEventListener(
+  "change",
+  function(e){
+
+    if(
+      e.target.id === "itemName"
+    ){
+
+      let option =
+        e.target.options[
+          e.target.selectedIndex
+        ];
+
+      document.getElementById(
+        "unit"
+      ).value =
+        option.getAttribute(
+          "data-unit"
+        ) || "";
+
+      document.getElementById(
+        "rate"
+      ).value =
+        option.getAttribute(
+          "data-rate"
+        ) || "";
+
+      calculateAmount();
+
+    }
+
+  }
+);
+
+/* ===================================
+   CALCULATE AMOUNT
+=================================== */
+
+function calculateAmount(){
+
+  let qty =
+    Number(
+      document.getElementById(
+        "qty"
+      ).value
+    );
+
+  let rate =
+    Number(
+      document.getElementById(
+        "rate"
+      ).value
+    );
+
+  document.getElementById(
+    "amount"
+  ).value =
+    qty * rate;
+
+}
+
+/* ===================================
+   SAVE INVOICE
+=================================== */
+
+function saveInvoice(){
+
+  let subCustomerValue = "";
+
+  if(
+    document.getElementById(
+      "showSubCustomer"
+    ).checked
+  ){
+
+    subCustomerValue =
+      document.getElementById(
+        "subCustomer"
+      ).value;
+
+  }
+
+  let invoice = {
+
+    invoiceNo:
+      document.getElementById(
+        "invoiceNo"
+      ).value,
+
+    customer:
+      document.getElementById(
+        "customerName"
+      ).value,
+
+    subCustomer:
+      subCustomerValue,
+
+    itemName:
+      document.getElementById(
+        "itemName"
+      ).value,
+
+    unit:
+      document.getElementById(
+        "unit"
+      ).value,
+
+    qty:
+      document.getElementById(
+        "qty"
+      ).value,
+
+    rate:
+      document.getElementById(
+        "rate"
+      ).value,
+
+    amount:
+      document.getElementById(
+        "amount"
+      ).value,
+
+    date:
+      document.getElementById(
+        "invoiceDate"
+      ).value
+
+  };
+
+  salesInvoices.push(invoice);
+
+  localStorage.setItem(
+    "salesInvoices",
+    JSON.stringify(salesInvoices)
+  );
+
+  displayInvoices();
+
+  resetForm();
+
+  generateInvoiceNo();
+
+}
+
+/* ===================================
+   DISPLAY INVOICES
+=================================== */
+
+function displayInvoices(){
+
+  let table =
+    document.getElementById(
+      "invoiceTable"
+    );
+
+  table.innerHTML = "";
+
+  let search =
+    document.getElementById(
+      "searchBox"
+    )
+    .value
+    .toLowerCase();
+
+  let productFilter =
+    document.getElementById(
+      "productFilter"
+    ).value;
+
+  let fromDate =
+    document.getElementById(
+      "fromDate"
+    ).value;
+
+  let toDate =
+    document.getElementById(
+      "toDate"
+    ).value;
+
+  let sr = 1;
+
+  salesInvoices.forEach((invoice,index)=>{
+
+    if(
+      fromDate !== "" &&
+      invoice.date < fromDate
+    ){
+      return;
+    }
+
+    if(
+      toDate !== "" &&
+      invoice.date > toDate
+    ){
+      return;
+    }
+
+    let matchSearch =
+
+      invoice.customer
+      .toLowerCase()
+      .includes(search)
+
+      ||
+
+      invoice.itemName
+      .toLowerCase()
+      .includes(search)
+
+      ||
+
+      invoice.invoiceNo
+      .toLowerCase()
+      .includes(search);
+
+    let matchProduct =
+
+      productFilter === ""
+
+      ||
+
+      invoice.itemName === productFilter;
+
+    if(
+      matchSearch &&
+      matchProduct
+    ){
+
+      table.innerHTML += `
+
+        <tr>
+
+          <td>${sr++}</td>
+
+          <td>
+            ${invoice.invoiceNo}
+          </td>
+
+          <td>
+            ${invoice.customer}
+          </td>
+
+          <td>
+            ${
+              invoice.subCustomer
+              || "-"
+            }
+          </td>
+
+          <td>
+            ${invoice.itemName}
+          </td>
+
+          <td>
+            ${invoice.unit}
+          </td>
+
+          <td>
+            ${invoice.qty}
+          </td>
+
+          <td>
+            ${invoice.rate}
+          </td>
+
+          <td>
+            ${invoice.amount}
+          </td>
+
+          <td>
+            ${invoice.date}
+          </td>
+
+          <td>
+
+            <button
+              class="edit-btn"
+              onclick="editInvoice(${index})"
+            >
+              Edit
+            </button>
+
+            <button
+              class="delete-btn"
+              onclick="deleteInvoice(${index})"
+            >
+              Delete
+            </button>
+
+          </td>
+
+        </tr>
+
+      `;
+
+    }
+
+  });
+
+}
+
+/* ===================================
+   EDIT INVOICE
+=================================== */
+
+function editInvoice(index){
+
+  let invoice =
+    salesInvoices[index];
+
+  document.getElementById(
+    "invoiceNo"
+  ).value =
+    invoice.invoiceNo;
+
+  document.getElementById(
+    "customerName"
+  ).value =
+    invoice.customer;
+
+  document.getElementById(
+    "subCustomer"
+  ).value =
+    invoice.subCustomer;
+
+  document.getElementById(
+    "itemName"
+  ).value =
+    invoice.itemName;
+
+  document.getElementById(
+    "unit"
+  ).value =
+    invoice.unit;
+
+  document.getElementById(
+    "qty"
+  ).value =
+    invoice.qty;
+
+  document.getElementById(
+    "rate"
+  ).value =
+    invoice.rate;
+
+  document.getElementById(
+    "amount"
+  ).value =
+    invoice.amount;
+
+  document.getElementById(
+    "invoiceDate"
+  ).value =
+    invoice.date;
+
+  salesInvoices.splice(index,1);
+
+  localStorage.setItem(
+    "salesInvoices",
+    JSON.stringify(salesInvoices)
+  );
+
+  displayInvoices();
+
+}
+
+/* ===================================
+   DELETE
+=================================== */
+
+function deleteInvoice(index){
+
+  if(confirm("Delete Invoice?")){
+
+    salesInvoices.splice(index,1);
+
+    localStorage.setItem(
+      "salesInvoices",
+      JSON.stringify(salesInvoices)
+    );
+
+    displayInvoices();
+
+  }
+
+}
+
+/* ===================================
+   RESET FORM
+=================================== */
+
+function resetForm(){
+
+  document.getElementById(
+    "customerName"
+  ).value = "";
+
+  document.getElementById(
+    "subCustomer"
+  ).value = "";
+
+  document.getElementById(
+    "itemName"
+  ).value = "";
+
+  document.getElementById(
+    "unit"
+  ).value = "";
+
+  document.getElementById(
+    "qty"
+  ).value = "";
+
+  document.getElementById(
+    "rate"
+  ).value = "";
+
+  document.getElementById(
+    "amount"
+  ).value = "";
+
+  document.getElementById(
+    "invoiceDate"
+  ).value = "";
+
+  document.getElementById(
+    "showSubCustomer"
+  ).checked = false;
+
+}
+
+/* ===================================
+   PRINT LIST
+=================================== */
+
+function printInvoices(){
+
+  let rows = "";
+
+  let search =
+    document.getElementById(
+      "searchBox"
+    )
+    .value
+    .toLowerCase();
+
+  let productFilter =
+    document.getElementById(
+      "productFilter"
+    ).value;
+
+  let fromDate =
+    document.getElementById(
+      "fromDate"
+    ).value;
+
+  let toDate =
+    document.getElementById(
+      "toDate"
+    ).value;
+
+  let sr = 1;
+
+  salesInvoices.forEach(invoice=>{
+
+    if(
+      fromDate !== "" &&
+      invoice.date < fromDate
+    ){
+      return;
+    }
+
+    if(
+      toDate !== "" &&
+      invoice.date > toDate
+    ){
+      return;
+    }
+
+    let matchSearch =
+
+      invoice.customer
+      .toLowerCase()
+      .includes(search)
+
+      ||
+
+      invoice.itemName
+      .toLowerCase()
+      .includes(search)
+
+      ||
+
+      invoice.invoiceNo
+      .toLowerCase()
+      .includes(search);
+
+    let matchProduct =
+
+      productFilter === ""
+
+      ||
+
+      invoice.itemName === productFilter;
+
+    if(
+      matchSearch &&
+      matchProduct
+    ){
+
+      rows += `
+
+        <tr>
+
+          <td>${sr++}</td>
+
+          <td>
+            ${invoice.invoiceNo}
+          </td>
+
+          <td>
+            ${invoice.customer}
+          </td>
+
+          <td>
+            ${
+              invoice.subCustomer
+              || "-"
+            }
+          </td>
+
+          <td>
+            ${invoice.itemName}
+          </td>
+
+          <td>
+            ${invoice.unit}
+          </td>
+
+          <td>
+            ${invoice.qty}
+          </td>
+
+          <td>
+            ${invoice.date}
+          </td>
+
+        </tr>
+
+      `;
+
+    }
+
+  });
+
+  document.getElementById(
+    "printArea"
+  ).innerHTML = `
+
+    <h2>
+      Sales Invoice List
+    </h2>
+
+    <table
+      border="1"
+      width="100%"
+      cellpadding="10"
+      cellspacing="0"
+      style="
+        border-collapse:collapse;
+        margin-top:20px;
+      "
+    >
+
+      <thead>
+
+        <tr>
+
+          <th>Sr No</th>
+          <th>Invoice No</th>
+          <th>Customer</th>
+          <th>Sub Customer</th>
+          <th>Item Name</th>
+          <th>Unit</th>
+          <th>Qty</th>
+          <th>Date</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        ${rows}
+
+      </tbody>
+
+    </table>
+
+  `;
+
+  window.print();
+
+}
+
+/* ===================================
+   PAGE LOAD
+=================================== */
+
+loadProducts();
+
+displayInvoices();
+
+generateInvoiceNo();
+
+
+
+// Add print button to page
+
+
+
+
+// Add print button to page
+if (typeof addPrintButtonToPage !== 'undefined') addPrintButtonToPage('sale invoice');
+
+</script>
+
+<script>
+function getCompanyInfoForPrint(){
+  try{return JSON.parse(localStorage.getItem('erp_company_info')||'null')||{}}catch(e){return{}}
+}
+function getCompanyPrintHeaderHtml(){
+  const info=getCompanyInfoForPrint();
+  const logo=info.logoDataUrl?`<img src="${info.logoDataUrl}" alt="Company Logo">`:'';
+  const name=info.companyName?`<div class="company-name">${info.companyName}</div>`:'';
+  const address=info.address?`<div class="company-address">${info.address}</div>`:'';
+  return `<div class="company-print-header-inner"><div class="left">${logo}</div><div class="center">${name}</div><div class="right">${address}</div></div>`;
+}
+function renderCompanyPrintHeader(){
+  const header=document.getElementById('companyPrintHeader');
+  if(header){header.innerHTML=getCompanyPrintHeaderHtml(); header.style.display='none';}
+}
+renderCompanyPrintHeader();
+</script>
+
+</body>
+</html>
+

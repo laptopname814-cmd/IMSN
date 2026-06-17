@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Credit Purchase Voucher System</title>
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial;
+}
+
+body{
+  background:#f3f4f6;
+  padding:20px;
+}
+
+.container{
+  max-width:1500px;
+  margin:auto;
+}
+
+.card{
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  margin-bottom:20px;
+  box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+h1,h2{
+  margin-bottom:20px;
+  color:#111827;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:15px;
+  margin-bottom:15px;
+}
+
+input,
+select,
+textarea{
+  width:100%;
+  padding:12px;
+  border:1px solid #ccc;
+  border-radius:5px;
+}
+
+textarea{
+  resize:none;
+  height:80px;
+}
+
+button{
+  padding:10px 15px;
+  border:none;
+  border-radius:5px;
+  color:white;
+  cursor:pointer;
+  margin-right:5px;
+}
+
+.new-btn{ background:#2563eb; }
+.save-btn{ background:green; }
+.edit-btn{ background:orange; }
+.delete-btn{ background:red; }
+.print-btn{ background:#9333ea; }
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+table th,
+table td{
+  border:1px solid #ddd;
+  padding:10px;
+  text-align:left;
+}
+
+table th{
+  background:#111827;
+  color:white;
+}
+
+.search-box{
+  margin-bottom:15px;
+}
+
+.search-box input{
+  width:350px;
+}
+
+.no-data{
+  color:red;
+  text-align:center;
+  font-weight:bold;
+}
+
+#printSection{
+  display:none;
+}
+
+/* ================= PRINT STYLE ================= */
+
+@media print{
+
+  body *{
+    visibility:hidden;
+  }
+
+  #printSection,
+  #printSection *{
+    visibility:visible;
+  }
+
+  #printSection{
+    display:block;
+    position:absolute;
+    left:0;
+    top:0;
+    width:100%;
+    background:white;
+    padding:20px;
+  }
+
+  #printSection table{
+    width:100%;
+    border-collapse:collapse;
+  }
+
+  #printSection table th,
+  #printSection table td{
+    border:1px solid black;
+    padding:10px;
+  }
+
+  #printSection table th{
+    background:#ddd !important;
+    color:black !important;
+  }
+
+  .company-print-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:2px solid #000;
+    padding-bottom:10px;
+    margin-bottom:15px;
+  }
+
+  .company-print-left,
+  .company-print-center,
+  .company-print-right{
+    flex:1;
+  }
+
+  .company-print-left{ text-align:left; }
+  .company-print-center{ text-align:center; }
+  .company-print-right{ text-align:right; }
+
+  .company-print-header img{
+    height:60px;
+  }
+
+  .company-name{
+    font-size:18px;
+    font-weight:bold;
+  }
+
+  .company-address{
+    font-size:12px;
+  }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="company-print-header" id="companyPrintHeader"></div>
+
+<div class="container">
+
+  <div class="card">
+    <h1>Credit Purchase Payment Voucher</h1>
+    <button class="new-btn" onclick="newVoucher()">New Voucher</button>
+  </div>
+
+  <div class="card">
+    <div class="grid">
+      <input type="date" id="voucherDate">
+      <input type="text" id="voucherNo" readonly>
+      <input type="text" id="supplierName" placeholder="Supplier Name">
+      <input type="number" id="remainingBalance" placeholder="Remaining Balance">
+
+      <select id="paymentType">
+        <option value="">Select Payment Type</option>
+        <option value="Cash">Cash</option>
+        <option value="Bank">Bank</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Payment Details</h2>
+
+    <div class="grid">
+      <input type="text" id="accountName" placeholder="Account Name">
+      <input type="number" id="amount" placeholder="Amount">
+    </div>
+
+    <textarea id="remarks" placeholder="Remarks"></textarea>
+
+    <br><br>
+
+    <button class="save-btn" onclick="saveVoucher()">Save Voucher</button>
+  </div>
+
+  <div class="card">
+    <h2>Search Voucher</h2>
+    <input type="text" id="searchVoucher" onkeyup="searchVoucherList()" placeholder="Search Voucher / Supplier">
+  </div>
+
+  <div class="card">
+    <h2>Voucher List</h2>
+    <button class="print-btn" onclick="printSearchList()">Print Search List</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Date</th>
+          <th>Voucher No</th>
+          <th>Supplier</th>
+          <th>Balance</th>
+          <th>Payment</th>
+          <th>Account</th>
+          <th>Amount</th>
+          <th>Remarks</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="voucherTable"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<div id="printSection"></div>
+
+<script>
+
+let vouchers = JSON.parse(localStorage.getItem("creditPurchaseVouchers")) || [];
+let editIndex = -1;
+
+/* VOUCHER NUMBER */
+function generateVoucherNumber(){
+  let last = localStorage.getItem("creditPurchaseVoucherLastNo");
+  last = last ? Number(last) + 1 : 1;
+
+  localStorage.setItem("creditPurchaseVoucherLastNo", last);
+
+  document.getElementById("voucherNo").value =
+    "CPV-" + String(last).padStart(4,"0");
+}
+
+/* SAVE */
+function saveVoucher(){
+
+  let voucher = {
+    date: voucherDate.value,
+    voucherNo: voucherNo.value,
+    supplier: supplierName.value,
+    balance: remainingBalance.value,
+    payment: paymentType.value,
+    account: accountName.value,
+    amount: amount.value,
+    remarks: remarks.value
+  };
+
+  if(!voucher.date || !voucher.supplier || !voucher.amount){
+    alert("Please Fill All Fields");
+    return;
+  }
+
+  if(editIndex === -1){
+    vouchers.push(voucher);
+  }else{
+    vouchers[editIndex] = voucher;
+    editIndex = -1;
+  }
+
+  localStorage.setItem("creditPurchaseVouchers", JSON.stringify(vouchers));
+
+  displayVoucherList();
+  newVoucher();
+}
+
+/* DISPLAY */
+function displayVoucherList(data = vouchers){
+
+  let table = document.getElementById("voucherTable");
+  table.innerHTML = "";
+
+  data.forEach((v, i)=>{
+
+    let realIndex = vouchers.indexOf(v);
+
+    table.innerHTML += `
+      <tr>
+        <td>${realIndex+1}</td>
+        <td>${v.date}</td>
+        <td>${v.voucherNo}</td>
+        <td>${v.supplier}</td>
+        <td>${v.balance}</td>
+        <td>${v.payment}</td>
+        <td>${v.account}</td>
+        <td>${v.amount}</td>
+        <td>${v.remarks}</td>
+        <td>
+          <button class="edit-btn" onclick="editVoucher(${realIndex})">Edit</button>
+          <button class="delete-btn" onclick="deleteVoucher(${realIndex})">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+/* SEARCH */
+function searchVoucherList(){
+  let val = searchVoucher.value.toLowerCase();
+
+  let filtered = vouchers.filter(v =>
+    v.voucherNo.toLowerCase().includes(val) ||
+    v.supplier.toLowerCase().includes(val)
+  );
+
+  displayVoucherList(filtered);
+}
+
+/* EDIT */
+function editVoucher(i){
+  let v = vouchers[i];
+
+  voucherDate.value = v.date;
+  voucherNo.value = v.voucherNo;
+  supplierName.value = v.supplier;
+  remainingBalance.value = v.balance;
+  paymentType.value = v.payment;
+  accountName.value = v.account;
+  amount.value = v.amount;
+  remarks.value = v.remarks;
+
+  editIndex = i;
+}
+
+/* DELETE */
+function deleteVoucher(i){
+  if(confirm("Delete Voucher?")){
+    vouchers.splice(i,1);
+    localStorage.setItem("creditPurchaseVouchers", JSON.stringify(vouchers));
+    displayVoucherList();
+  }
+}
+
+/* NEW */
+function newVoucher(){
+  voucherDate.value = "";
+  supplierName.value = "";
+  remainingBalance.value = "";
+  paymentType.value = "";
+  accountName.value = "";
+  amount.value = "";
+  remarks.value = "";
+
+  editIndex = -1;
+  generateVoucherNumber();
+}
+
+/* PRINT */
+function printSearchList(){
+
+  let val = searchVoucher.value.toLowerCase();
+
+  let filtered = vouchers.filter(v =>
+    v.voucherNo.toLowerCase().includes(val) ||
+    v.supplier.toLowerCase().includes(val)
+  );
+
+  let rows = filtered.map((v,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td>${v.date}</td>
+      <td>${v.voucherNo}</td>
+      <td>${v.supplier}</td>
+      <td>${v.amount}</td>
+    </tr>
+  `).join("");
+
+  const info = JSON.parse(localStorage.getItem("erp_company_info") || "{}");
+
+  document.getElementById("printSection").innerHTML = `
+    
+    <div class="company-print-header">
+
+      <div class="company-print-left">
+        ${info.logoDataUrl ? `<img src="${info.logoDataUrl}">` : ""}
+      </div>
+
+      <div class="company-print-center">
+        <div class="company-name">${info.companyName || ""}</div>
+      </div>
+
+      <div class="company-print-right">
+        <div class="company-address">${info.address || ""}</div>
+      </div>
+
+    </div>
+
+    <h2>Credit Purchase Voucher List</h2>
+
+    <table>
+      <tr>
+        <th>ID</th>
+        <th>Date</th>
+        <th>Voucher</th>
+        <th>Supplier</th>
+        <th>Amount</th>
+      </tr>
+      ${rows}
+    </table>
+  `;
+
+  setTimeout(()=>window.print(),300);
+}
+
+/* INIT */
+generateVoucherNumber();
+displayVoucherList();
+
+</script>
+
+<script>
+function getCompanyInfoForPrint(){
+  try{return JSON.parse(localStorage.getItem('erp_company_info')||'null')||{}}catch(e){return{}}
+}
+function getCompanyPrintHeaderHtml(){
+  const info=getCompanyInfoForPrint();
+  const logo=info.logoDataUrl?`<img src="${info.logoDataUrl}" alt="Company Logo">`:'';
+  const name=info.companyName?`<div class="company-name">${info.companyName}</div>`:'';
+  const address=info.address?`<div class="company-address">${info.address}</div>`:'';
+  return `<div class="company-print-header-inner"><div class="left">${logo}</div><div class="center">${name}</div><div class="right">${address}</div></div>`;
+}
+function renderCompanyPrintHeader(){
+  const header=document.getElementById('companyPrintHeader');
+  if(header){header.innerHTML=getCompanyPrintHeaderHtml(); header.style.display='none';}
+}
+renderCompanyPrintHeader();
+</script>
+
+</body>
+</html>

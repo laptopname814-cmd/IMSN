@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Customer Payment Voucher</title>
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial;
+}
+
+body{
+  background:#f3f4f6;
+  padding:20px;
+}
+
+.container{
+  max-width:1500px;
+  margin:auto;
+}
+
+.card{
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  margin-bottom:20px;
+  box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+h1,h2{
+  margin-bottom:20px;
+  color:#111827;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:
+  repeat(auto-fit,minmax(220px,1fr));
+  gap:15px;
+  margin-bottom:15px;
+}
+
+input,
+select,
+textarea{
+  width:100%;
+  padding:12px;
+  border:1px solid #ccc;
+  border-radius:5px;
+}
+
+textarea{
+  resize:none;
+  height:80px;
+}
+
+button{
+  padding:10px 15px;
+  border:none;
+  border-radius:5px;
+  color:white;
+  cursor:pointer;
+  margin-right:5px;
+  margin-top:5px;
+}
+
+.new-btn{
+  background:#2563eb;
+}
+
+.save-btn{
+  background:green;
+}
+
+.edit-btn{
+  background:orange;
+}
+
+.delete-btn{
+  background:red;
+}
+
+.print-btn{
+  background:#9333ea;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+table th,
+table td{
+  border:1px solid #ddd;
+  padding:10px;
+  text-align:left;
+}
+
+table th{
+  background:#111827;
+  color:white;
+}
+
+.search-box{
+  margin-bottom:15px;
+}
+
+.search-box input{
+  max-width:400px;
+}
+
+.no-data{
+  text-align:center;
+  color:red;
+  font-weight:bold;
+}
+
+.tick-box{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:10px;
+}
+
+#printSection{
+  width:100%;
+}
+
+.company-print-header{
+  display:none;
+  width:100%;
+  border-bottom:2px solid #000;
+  padding-bottom:10px;
+  margin-bottom:15px;
+}
+
+.company-print-header-inner{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.company-print-header .left,
+.company-print-header .center,
+.company-print-header .right{
+  flex:1 1 30%;
+  min-width:160px;
+}
+
+.company-print-header .left{
+  text-align:left;
+}
+
+.company-print-header .center{
+  text-align:center;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.company-print-header .right{
+  text-align:right;
+}
+
+.company-print-header img{
+  max-height:70px;
+  display:inline-block;
+}
+
+.company-print-header .company-name{
+  font-size:18px;
+  font-weight:bold;
+}
+
+.company-print-header .company-address{
+  font-size:13px;
+  color:#444;
+  white-space:pre-wrap;
+}
+
+@media print{
+
+  body *{
+    visibility:hidden;
+  }
+
+  #companyPrintHeader,
+  #companyPrintHeader *,
+  #printSection,
+  #printSection *{
+    visibility:visible;
+  }
+
+  #companyPrintHeader{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    background:white;
+    padding:15px 20px;
+    display:block !important;
+    z-index:999;
+  }
+
+  #printSection{
+    position:absolute;
+    left:0;
+    top:120px;
+    width:100%;
+  }
+
+  #printSection th:last-child,
+  #printSection td:last-child,
+  #printSection button{
+    display:none !important;
+  }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="company-print-header" id="companyPrintHeader"></div>
+
+<div class="container">
+
+  <!-- HEADER -->
+
+  <div class="card">
+
+    <h1>Customer Payment Voucher</h1>
+
+    <button
+      class="new-btn"
+      onclick="newVoucher()"
+    >
+      New Customer Payment Voucher
+    </button>
+
+  </div>
+
+  <!-- FORM -->
+
+  <div class="card">
+
+    <h2>Voucher Form</h2>
+
+    <div class="form-grid">
+
+      <input
+        type="date"
+        id="voucherDate"
+      >
+
+      <input
+        type="text"
+        id="voucherNo"
+        placeholder="Voucher Number"
+        readonly
+      >
+
+      <input
+        type="text"
+        id="customerName"
+        placeholder="Customer Name"
+        onkeyup="checkSubCustomer()"
+      >
+
+      <input
+        type="text"
+        id="subCustomer"
+        placeholder="Sub Customer"
+        onkeyup="checkSubCustomer()"
+      >
+
+      <input
+        type="number"
+        id="remainingBalance"
+        placeholder="Remaining Balance"
+      >
+
+      <select id="paymentType">
+
+        <option value="Cash">
+          Cash
+        </option>
+
+        <option value="Bank">
+          Bank
+        </option>
+
+      </select>
+
+    </div>
+
+    <div class="tick-box">
+
+      <input
+        type="checkbox"
+        id="subCustomerTick"
+        
+      >
+
+      <label>
+        Sub Customer Present
+      </label>
+
+    </div>
+
+  </div>
+
+  <!-- PAYMENT FORM -->
+
+  <div class="card">
+
+    <h2>Payment Details</h2>
+
+    <div class="form-grid">
+
+      <input
+        type="text"
+        id="accountName"
+        placeholder="Account Name"
+      >
+
+      <input
+        type="number"
+        id="amount"
+        placeholder="Amount"
+      >
+
+    </div>
+
+    <textarea
+      id="remarks"
+      placeholder="Remarks"
+    ></textarea>
+
+    <br>
+
+    <button
+      class="save-btn"
+      onclick="saveVoucher()"
+    >
+      Save Voucher
+    </button>
+
+  </div>
+
+  <!-- LIST -->
+
+  <div class="card">
+
+    <h2>Voucher List</h2>
+
+    <div class="search-box">
+
+      <input
+        type="text"
+        id="searchVoucher"
+        placeholder="Search Voucher / Customer / Account"
+        onkeyup="searchVoucherList()"
+      >
+
+      <button
+        class="print-btn"
+        onclick="printSearchList()"
+      >
+        Print Search List
+      </button>
+
+    </div>
+
+    <div id="printSection">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>ID</th>
+            <th>Date</th>
+            <th>Voucher No</th>
+            <th>Customer</th>
+            <th>Sub Customer</th>
+            <th>Balance</th>
+            <th>Type</th>
+            <th>Account</th>
+            <th>Amount</th>
+            <th>Remarks</th>
+            <th>Action</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody id="voucherTable">
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+let customerVouchers =
+
+JSON.parse(
+  localStorage.getItem(
+    "customerPaymentVouchers"
+  )
+) || [];
+
+let editIndex = -1;
+
+
+// AUTO VOUCHER NUMBER
+
+function generateVoucherNumber(){
+
+  let lastVoucher =
+
+    localStorage.getItem(
+      "lastCustomerVoucherNumber"
+    );
+
+  if(lastVoucher === null){
+
+    lastVoucher = 1000;
+
+  }else{
+
+    lastVoucher =
+      Number(lastVoucher) + 1;
+
+  }
+
+  localStorage.setItem(
+
+    "lastCustomerVoucherNumber",
+
+    lastVoucher
+
+  );
+
+  document.getElementById(
+    "voucherNo"
+  ).value =
+
+    "CPV-" + lastVoucher;
+
+}
+
+
+// SUB CUSTOMER CHECK
+
+function checkSubCustomer(){
+
+  let subCustomer =
+
+    document.getElementById(
+      "subCustomer"
+    ).value;
+
+  if(subCustomer.trim() !== ""){
+
+    document.getElementById(
+      "subCustomerTick"
+    ).checked = true;
+
+  }else{
+
+    document.getElementById(
+      "subCustomerTick"
+    ).checked = false;
+
+  }
+
+}
+
+
+// SAVE VOUCHER
+
+function saveVoucher(){
+
+  let voucher = {
+
+    date:
+      document.getElementById(
+        "voucherDate"
+      ).value,
+
+    voucherNo:
+      document.getElementById(
+        "voucherNo"
+      ).value,
+
+    customer:
+      document.getElementById(
+        "customerName"
+      ).value,
+
+    subCustomer:
+      document.getElementById(
+        "subCustomer"
+      ).value,
+
+    balance:
+      document.getElementById(
+        "remainingBalance"
+      ).value,
+
+    paymentType:
+      document.getElementById(
+        "paymentType"
+      ).value,
+
+    account:
+      document.getElementById(
+        "accountName"
+      ).value,
+
+    amount:
+      document.getElementById(
+        "amount"
+      ).value,
+
+    remarks:
+      document.getElementById(
+        "remarks"
+      ).value
+
+  };
+
+  if(
+
+    voucher.date === "" ||
+    voucher.customer === "" ||
+    voucher.account === "" ||
+    voucher.amount === ""
+
+  ){
+
+    alert("Please Fill All Fields");
+
+    return;
+
+  }
+
+  if(editIndex === -1){
+
+    customerVouchers.push(voucher);
+
+  }else{
+
+    customerVouchers[editIndex] =
+      voucher;
+
+    editIndex = -1;
+
+  }
+
+  localStorage.setItem(
+
+    "customerPaymentVouchers",
+
+    JSON.stringify(customerVouchers)
+
+  );
+
+  displayVoucherList(customerVouchers);
+
+  alert("Voucher Saved");
+
+  resetForm();
+
+}
+
+
+// DISPLAY LIST
+
+function displayVoucherList(data){
+
+  let table =
+
+    document.getElementById(
+      "voucherTable"
+    );
+
+  table.innerHTML = "";
+
+  if(data.length === 0){
+
+    table.innerHTML = `
+
+      <tr>
+
+        <td
+          colspan="11"
+          class="no-data"
+        >
+
+          No Voucher Found
+
+        </td>
+
+      </tr>
+
+    `;
+
+    return;
+
+  }
+
+  data.forEach((voucher,index)=>{
+
+    table.innerHTML += `
+
+      <tr>
+
+        <td>${index + 1}</td>
+
+        <td>${voucher.date}</td>
+
+        <td>${voucher.voucherNo}</td>
+
+        <td>${voucher.customer}</td>
+
+        <td>${voucher.subCustomer}</td>
+
+        <td>${voucher.balance}</td>
+
+        <td>${voucher.paymentType}</td>
+
+        <td>${voucher.account}</td>
+
+        <td>${voucher.amount}</td>
+
+        <td>${voucher.remarks}</td>
+
+        <td>
+
+          <button
+            class="edit-btn"
+            onclick="editVoucher(${index})"
+          >
+            Edit
+          </button>
+
+          <button
+            class="delete-btn"
+            onclick="deleteVoucher(${index})"
+          >
+            Delete
+          </button>
+
+        </td>
+
+      </tr>
+
+    `;
+
+  });
+
+}
+
+
+// EDIT
+
+function editVoucher(index){
+
+  let voucher =
+    customerVouchers[index];
+
+  document.getElementById(
+    "voucherDate"
+  ).value = voucher.date;
+
+  document.getElementById(
+    "voucherNo"
+  ).value = voucher.voucherNo;
+
+  document.getElementById(
+    "customerName"
+  ).value = voucher.customer;
+
+  document.getElementById(
+    "subCustomer"
+  ).value = voucher.subCustomer;
+
+  document.getElementById(
+    "remainingBalance"
+  ).value = voucher.balance;
+
+  document.getElementById(
+    "paymentType"
+  ).value = voucher.paymentType;
+
+  document.getElementById(
+    "accountName"
+  ).value = voucher.account;
+
+  document.getElementById(
+    "amount"
+  ).value = voucher.amount;
+
+  document.getElementById(
+    "remarks"
+  ).value = voucher.remarks;
+
+  checkSubCustomer();
+
+  editIndex = index;
+
+}
+
+
+// DELETE
+
+function deleteVoucher(index){
+
+  if(confirm("Delete Voucher?")){
+
+    customerVouchers.splice(index,1);
+
+    localStorage.setItem(
+
+      "customerPaymentVouchers",
+
+      JSON.stringify(customerVouchers)
+
+    );
+
+    displayVoucherList(customerVouchers);
+
+  }
+
+}
+
+
+// SEARCH
+
+function searchVoucherList(){
+
+  let value =
+
+    document.getElementById(
+      "searchVoucher"
+    )
+    .value
+    .toLowerCase();
+
+  let filtered =
+
+    customerVouchers.filter(voucher =>
+
+      voucher.voucherNo
+      .toLowerCase()
+      .includes(value)
+
+      ||
+
+      voucher.customer
+      .toLowerCase()
+      .includes(value)
+
+      ||
+
+      voucher.account
+      .toLowerCase()
+      .includes(value)
+
+    );
+
+  displayVoucherList(filtered);
+
+}
+
+
+// PRINT SEARCH LIST
+
+function printSearchList(){
+
+  window.print();
+
+}
+
+
+// RESET FORM
+
+function resetForm(){
+
+  document.getElementById(
+    "voucherDate"
+  ).value = "";
+
+  document.getElementById(
+    "customerName"
+  ).value = "";
+
+  document.getElementById(
+    "subCustomer"
+  ).value = "";
+
+  document.getElementById(
+    "remainingBalance"
+  ).value = "";
+
+  document.getElementById(
+    "paymentType"
+  ).value = "Cash";
+
+  document.getElementById(
+    "accountName"
+  ).value = "";
+
+  document.getElementById(
+    "amount"
+  ).value = "";
+
+  document.getElementById(
+    "remarks"
+  ).value = "";
+
+  document.getElementById(
+    "subCustomerTick"
+  ).checked = false;
+
+  editIndex = -1;
+
+  generateVoucherNumber();
+
+}
+
+
+// NEW VOUCHER
+
+function newVoucher(){
+
+  resetForm();
+
+}
+
+
+// PAGE LOAD
+
+generateVoucherNumber();
+
+displayVoucherList(customerVouchers);
+
+
+
+// Add print button to page
+addPrintButtonToPage('customer payment voucher');
+
+</script>
+
+<script>
+function getCompanyInfoForPrint(){
+  try{return JSON.parse(localStorage.getItem('erp_company_info')||'null')||{}}catch(e){return{}}
+}
+function getCompanyPrintHeaderHtml(){
+  const info=getCompanyInfoForPrint();
+  const logo=info.logoDataUrl?`<img src="${info.logoDataUrl}" alt="Company Logo">`:'';
+  const name=info.companyName?`<div class="company-name">${info.companyName}</div>`:'';
+  const address=info.address?`<div class="company-address">${info.address}</div>`:'';
+  return `<div class="company-print-header-inner"><div class="left">${logo}</div><div class="center">${name}</div><div class="right">${address}</div></div>`;
+}
+function renderCompanyPrintHeader(){
+  const header=document.getElementById('companyPrintHeader');
+  if(header){header.innerHTML=getCompanyPrintHeaderHtml(); header.style.display='none';}
+}
+renderCompanyPrintHeader();
+</script>
+
+</body>
+</html>
+
+
+
+

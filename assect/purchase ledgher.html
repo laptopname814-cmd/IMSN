@@ -1,0 +1,804 @@
+<!-- COMPLETE PURCHASE LEDGER WITH SEARCH BAR -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Purchase Ledger</title>
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial;
+}
+
+body{
+  background:#f4f6f9;
+  padding:20px;
+}
+
+.container{
+  max-width:1400px;
+  margin:auto;
+}
+
+.card{
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  margin-bottom:20px;
+  box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+h1,h2{
+  margin-bottom:20px;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:10px;
+  margin-bottom:20px;
+}
+
+input,
+select{
+  padding:10px;
+  border:1px solid #ccc;
+  border-radius:5px;
+  width:100%;
+}
+
+button{
+  padding:10px 15px;
+  border:none;
+  border-radius:5px;
+  color:white;
+  cursor:pointer;
+  margin-right:5px;
+}
+
+.save-btn{
+  background:#2563eb;
+}
+
+.generate-btn{
+  background:#9333ea;
+}
+
+.print-btn{
+  background:green;
+}
+
+.pdf-btn{
+  background:red;
+}
+
+.edit-btn{
+  background:orange;
+}
+
+.delete-btn{
+  background:#dc2626;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+table th,
+table td{
+  border:1px solid #ddd;
+  padding:12px;
+  text-align:left;
+}
+
+table th{
+  background:#111827;
+  color:white;
+}
+
+.total-box{
+  margin-top:20px;
+  font-size:18px;
+  font-weight:bold;
+}
+
+@media print{
+
+  button,
+  .card{
+    display:none !important;
+  }
+
+  .company-print-header,
+  .card:first-of-type,
+  .card:last-of-type{
+    display:block !important;
+  }
+
+  .card:first-of-type .form-grid,
+  .card:first-of-type .save-btn,
+  .card:first-of-type h1{
+    display:none !important;
+  }
+
+  .card:last-of-type .ledger-title{
+    display:block !important;
+  }
+
+  .card:last-of-type table th:last-child,
+  .card:last-of-type table td:last-child{
+    display:none !important;
+  }
+
+  .company-print-header .company-print-title{
+    display:none !important;
+  }
+
+}
+
+.company-print-header{
+  display:none;
+  width:100%;
+  border-bottom:2px solid #000;
+  padding-bottom:10px;
+  margin-bottom:15px;
+}
+
+.company-print-header-inner{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.company-print-header .left,
+.company-print-header .center,
+.company-print-header .right{
+  width:33%;
+}
+
+.company-print-header .left{
+  text-align:left;
+}
+
+.company-print-header .center{
+  text-align:center;
+}
+
+.company-print-header .right{
+  text-align:right;
+}
+
+.company-print-header img{
+  max-height:70px;
+}
+
+.company-print-header .company-name{
+  font-size:18px;
+  font-weight:bold;
+}
+
+.company-print-header .company-address{
+  font-size:13px;
+  color:#444;
+  white-space:pre-wrap;
+}
+
+.company-print-title{
+  margin-top:8px;
+  font-size:16px;
+  font-weight:600;
+  color:#111;
+}
+
+</style>
+
+  <div class="company-print-header" id="companyPrintHeader"></div>
+
+  <div class="card">
+
+    <h1>Purchase Ledger</h1>
+
+    <div class="form-grid">
+
+      <input
+        type="text"
+        id="invoice"
+        placeholder="Invoice No"
+      >
+
+      <input
+        type="text"
+        id="voucher"
+        placeholder="Voucher No"
+      >
+
+      <input
+        type="text"
+        id="name"
+        placeholder="Supplier Name"
+      >
+
+      <input
+        type="date"
+        id="date"
+      >
+
+      <input
+        type="number"
+        id="amount"
+        placeholder="Amount"
+      >
+
+    </div>
+
+    <button
+      class="save-btn"
+      onclick="saveLedger()"
+    >
+      Save
+    </button>
+
+  </div>
+
+  <!-- SEARCH SECTION -->
+
+  <div class="card search-card">
+
+    <h2>Search Purchase Ledger</h2>
+
+    <div class="form-grid">
+
+      <input
+        type="text"
+        id="searchName"
+        placeholder="Search Supplier Name"
+        onkeyup="searchLedger()"
+      >
+
+      <input
+        type="text"
+        id="searchInvoice"
+        placeholder="Search Invoice"
+        onkeyup="searchLedger()"
+      >
+
+      <input
+        type="text"
+        id="searchVoucher"
+        placeholder="Search Voucher"
+        onkeyup="searchLedger()"
+      >
+
+      <input
+        type="date"
+        id="fromDate"
+        onchange="searchLedger()"
+      >
+
+      <input
+        type="date"
+        id="toDate"
+        onchange="searchLedger()"
+      >
+
+      <select
+        id="sortOption"
+        onchange="searchLedger()"
+      >
+
+        <option value="">
+          Sort By
+        </option>
+
+        <option value="name">
+          Name
+        </option>
+
+        <option value="amount">
+          Amount
+        </option>
+
+        <option value="date">
+          Date
+        </option>
+
+      </select>
+
+    </div>
+
+    <button
+      class="generate-btn"
+      onclick="searchLedger()"
+    >
+      Generate
+    </button>
+
+    <button
+      class="print-btn"
+      onclick="window.print()"
+    >
+      Print
+    </button>
+
+    <button
+      class="pdf-btn"
+      onclick="downloadPDF()"
+    >
+      PDF
+    </button>
+
+  </div>
+
+  <!-- TABLE -->
+
+  <div class="card">
+
+    <h2 class="ledger-title">Purchase Ledger</h2>
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>ID</th>
+          <th>Invoice</th>
+          <th>Voucher</th>
+          <th>Supplier</th>
+          <th>Date</th>
+          <th>Amount</th>
+          <th>Action</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody id="ledgerTable">
+
+      </tbody>
+
+    </table>
+
+    <div class="total-box">
+
+      Total Amount :
+      <span id="totalAmount">0</span>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+let purchaseLedger =
+  JSON.parse(
+    localStorage.getItem("purchaseLedger")
+  ) || [];
+
+let editIndex = -1;
+
+
+// SAVE LOCAL STORAGE
+
+function saveData(){
+
+  localStorage.setItem(
+    "purchaseLedger",
+    JSON.stringify(purchaseLedger)
+  );
+
+}
+
+function parseLedgerNumber(value){
+  const digits = (value || "").toString().replace(/\D/g, "");
+  return digits ? Number(digits) : NaN;
+}
+
+function getLedgerCounters(){
+  return JSON.parse(localStorage.getItem("purchaseLedgerCounters") || 'null') || { invoice: 1000, voucher: 5000 };
+}
+
+function saveLedgerCounters(counters){
+  localStorage.setItem("purchaseLedgerCounters", JSON.stringify(counters));
+}
+
+function updateLedgerCountersFromRecords(){
+  const storedCounters = getLedgerCounters();
+  const counters = { invoice: storedCounters.invoice || 1000, voucher: storedCounters.voucher || 5000 };
+
+  purchaseLedger.forEach(item => {
+    const invoiceNumber = parseLedgerNumber(item.invoice);
+    const voucherNumber = parseLedgerNumber(item.voucher);
+
+    if(!isNaN(invoiceNumber) && invoiceNumber > counters.invoice) counters.invoice = invoiceNumber;
+    if(!isNaN(voucherNumber) && voucherNumber > counters.voucher) counters.voucher = voucherNumber;
+  });
+
+  saveLedgerCounters(counters);
+}
+
+function getNextAvailableInvoiceNumber(){
+  const counters = getLedgerCounters();
+  return String((Number(counters.invoice) || 1000) + 1);
+}
+
+function getNextAvailableVoucherNumber(){
+  const counters = getLedgerCounters();
+  return String((Number(counters.voucher) || 5000) + 1);
+}
+
+function setGeneratedLedgerNumbers(){
+  document.getElementById("invoice").value = getNextAvailableInvoiceNumber();
+  document.getElementById("voucher").value = getNextAvailableVoucherNumber();
+}
+
+
+// DISPLAY TABLE
+
+function displayLedger(data){
+
+  let table =
+    document.getElementById("ledgerTable");
+
+  table.innerHTML = "";
+
+  let total = 0;
+
+  data.forEach((item,index)=>{
+
+    total += Number(item.amount);
+
+    table.innerHTML += `
+
+      <tr>
+
+        <td>${index + 1}</td>
+
+        <td>${item.invoice}</td>
+
+        <td>${item.voucher}</td>
+
+        <td>${item.name}</td>
+
+        <td>${item.date}</td>
+
+        <td>₹ ${item.amount}</td>
+
+         <td>
+
+          <button
+            class="edit-btn"
+            onclick="editLedger(${index})"
+          >
+            Edit
+          </button>
+
+          <button
+            class="delete-btn"
+            onclick="deleteLedger(${index})"
+          >
+            Delete
+          </button>
+
+         </td> 
+
+      </tr>
+
+    `;
+  });
+
+  document.getElementById("totalAmount")
+  .innerText = total;
+
+}
+
+
+// SAVE LEDGER
+
+function saveLedger(){
+
+  let invoice =
+    document.getElementById("invoice")
+    .value;
+
+  let voucher =
+    document.getElementById("voucher")
+    .value;
+
+  let name =
+    document.getElementById("name")
+    .value;
+
+  let date =
+    document.getElementById("date")
+    .value;
+
+  let amount =
+    document.getElementById("amount")
+    .value;
+
+  if(
+    invoice === "" ||
+    voucher === "" ||
+    name === "" ||
+    date === "" ||
+    amount === ""
+  ){
+
+    alert("Please Fill All Fields");
+
+    return;
+  }
+
+  let ledgerData = {
+
+    invoice,
+    voucher,
+    name,
+    date,
+    amount
+
+  };
+
+  if(editIndex === -1){
+
+    purchaseLedger.push(ledgerData);
+
+  }else{
+
+    purchaseLedger[editIndex] =
+      ledgerData;
+
+    editIndex = -1;
+  }
+
+  saveData();
+  updateLedgerCountersFromRecords();
+  displayLedger(purchaseLedger);
+  clearForm();
+
+}
+
+
+// EDIT DATA
+
+function editLedger(index){
+
+  let item =
+    purchaseLedger[index];
+
+  document.getElementById("invoice")
+  .value = item.invoice;
+
+  document.getElementById("voucher")
+  .value = item.voucher;
+
+  document.getElementById("name")
+  .value = item.name;
+
+  document.getElementById("date")
+  .value = item.date;
+
+  document.getElementById("amount")
+  .value = item.amount;
+
+  editIndex = index;
+
+}
+
+
+// DELETE DATA
+
+function deleteLedger(index){
+
+  if(confirm("Delete Record?")){
+
+    purchaseLedger.splice(index,1);
+
+    saveData();
+
+    displayLedger(purchaseLedger);
+
+  }
+
+}
+
+
+// CLEAR FORM
+
+function clearForm(){
+
+  document.getElementById("invoice")
+  .value = "";
+
+  document.getElementById("voucher")
+  .value = "";
+
+  document.getElementById("name")
+  .value = "";
+
+  document.getElementById("date")
+  .value = "";
+
+  document.getElementById("amount")
+  .value = "";
+
+  setGeneratedLedgerNumbers();
+}
+
+
+// SEARCH FUNCTION
+
+function searchLedger(){
+
+  let name =
+    document.getElementById("searchName")
+    .value
+    .toLowerCase();
+
+  let invoice =
+    document.getElementById("searchInvoice")
+    .value
+    .toLowerCase();
+
+  let voucher =
+    document.getElementById("searchVoucher")
+    .value
+    .toLowerCase();
+
+  let fromDate =
+    document.getElementById("fromDate")
+    .value;
+
+  let toDate =
+    document.getElementById("toDate")
+    .value;
+
+  let sortOption =
+    document.getElementById("sortOption")
+    .value;
+
+  let filteredData =
+    purchaseLedger.filter(item=>{
+
+      let matchName =
+        item.name
+        .toLowerCase()
+        .includes(name);
+
+      let matchInvoice =
+        item.invoice
+        .toLowerCase()
+        .includes(invoice);
+
+      let matchVoucher =
+        item.voucher
+        .toLowerCase()
+        .includes(voucher);
+
+      let matchDate = true;
+
+      if(fromDate && toDate){
+
+        matchDate =
+          item.date >= fromDate &&
+          item.date <= toDate;
+
+      }else if(fromDate){
+
+        matchDate =
+          item.date >= fromDate;
+
+      }else if(toDate){
+
+        matchDate =
+          item.date <= toDate;
+
+      }
+
+      return (
+
+        matchName &&
+        matchInvoice &&
+        matchVoucher &&
+        matchDate
+
+      );
+
+    });
+
+
+  // SORTING
+
+  if(sortOption === "name"){
+
+    filteredData.sort((a,b)=>
+
+      a.name.localeCompare(b.name)
+
+    );
+
+  }
+
+  if(sortOption === "amount"){
+
+    filteredData.sort((a,b)=>
+
+      Number(a.amount) -
+      Number(b.amount)
+
+    );
+
+  }
+
+  if(sortOption === "date"){
+
+    filteredData.sort((a,b)=>
+
+      new Date(a.date) -
+      new Date(b.date)
+
+    );
+
+  }
+
+  displayLedger(filteredData);
+
+}
+
+
+// PDF
+
+function downloadPDF(){
+
+  alert("PDF Download Ready");
+
+}
+
+
+// LOAD DATA
+
+updateLedgerCountersFromRecords();
+displayLedger(purchaseLedger);
+setGeneratedLedgerNumbers();
+
+
+// Add print button to page
+if (typeof addPrintButtonToPage !== 'undefined') addPrintButtonToPage('Purchase Ledger');
+
+</script>
+
+<script>
+function getCompanyInfoForPrint(){
+  try{return JSON.parse(localStorage.getItem('erp_company_info')||'null')||{}}catch(e){return{}}
+}
+function getCompanyPrintHeaderHtml(title){
+  const info=getCompanyInfoForPrint();
+  const logo=info.logoDataUrl?`<img src="${info.logoDataUrl}" alt="Company Logo">`:'';
+  const name=info.companyName?`<div class="company-name">${info.companyName}</div>`:'';
+  const address=info.address?`<div class="company-address">${info.address}</div>`:'';
+  const titleHtml=title?`<div class="company-print-title">${title}</div>`:'';
+  return `<div class="company-print-header-inner"><div class="left">${logo}</div><div class="center">${name}${titleHtml}</div><div class="right">${address}</div></div>`;
+}
+function renderCompanyPrintHeader(){
+  const header=document.getElementById('companyPrintHeader');
+  if(header){header.innerHTML=getCompanyPrintHeaderHtml('Purchase Ledger'); header.style.display='none';}
+}
+renderCompanyPrintHeader();
+</script>
+
+</body>
+</html>

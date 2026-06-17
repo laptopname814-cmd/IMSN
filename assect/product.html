@@ -1,0 +1,1527 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
+
+<title>
+Advanced Product Management
+</title>
+
+<style>
+
+/* =====================================
+   GLOBAL
+===================================== */
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial;
+}
+
+body{
+  background:#f3f4f6;
+  padding:20px;
+}
+
+.container{
+  max-width:1600px;
+  margin:auto;
+}
+
+/* =====================================
+   CARD
+===================================== */
+
+.card{
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  margin-bottom:20px;
+  box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+h1,h2{
+  margin-bottom:20px;
+  color:#111827;
+}
+
+/* =====================================
+   FORM GRID
+===================================== */
+
+.form-grid{
+  display:grid;
+  grid-template-columns:
+  repeat(auto-fit,minmax(220px,1fr));
+  gap:15px;
+  margin-bottom:15px;
+}
+
+/* =====================================
+   INPUTS
+===================================== */
+
+input,
+select{
+  width:100%;
+  padding:12px;
+  border:1px solid #ccc;
+  border-radius:5px;
+}
+
+/* =====================================
+   BUTTONS
+===================================== */
+
+button{
+  padding:10px 15px;
+  border:none;
+  border-radius:5px;
+  color:white;
+  cursor:pointer;
+}
+
+.save-btn{
+  background:#16a34a;
+}
+
+.reset-btn{
+  background:#dc2626;
+}
+
+.edit-btn{
+  background:#f59e0b;
+}
+
+.delete-btn{
+  background:#dc2626;
+}
+
+.print-btn{
+  background:#7c3aed;
+}
+
+.generate-btn{
+  background:#2563eb;
+}
+
+.unit-btn{
+  background:#2563eb;
+}
+
+/* =====================================
+   TABLE
+===================================== */
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+}
+
+table th,
+table td{
+  border:1px solid #ddd;
+  padding:12px;
+  text-align:left;
+}
+
+table th{
+  background:#111827;
+  color:white;
+}
+
+table tr:nth-child(even){
+  background:#f9fafb;
+}
+
+.stock-green{
+  color:green;
+  font-weight:bold;
+}
+
+/* SERVER STATUS */
+.server-status {
+  background: #d1d5db;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 5px;
+  display: inline-block;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.stock-red{
+  color:red;
+  font-weight:bold;
+}
+
+/* =====================================
+   SEARCH
+===================================== */
+
+.search-box{
+  margin-bottom:15px;
+}
+
+.no-data{
+  text-align:center;
+  color:red;
+  font-weight:bold;
+}
+
+.company-print-header{
+  display:none;
+  width:100%;
+  border-bottom:2px solid #000;
+  padding-bottom:10px;
+  margin-bottom:15px;
+}
+
+.company-print-header-inner{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.company-print-header .left,
+.company-print-header .center,
+.company-print-header .right{
+  width:33%;
+}
+
+.company-print-header .left{
+  text-align:left;
+}
+
+.company-print-header .center{
+  text-align:center;
+}
+
+.company-print-header .right{
+  text-align:right;
+}
+
+.company-print-header img{
+  max-height:70px;
+}
+
+.company-print-header .company-name{
+  font-size:18px;
+  font-weight:bold;
+}
+
+.company-print-header .company-address{
+  font-size:13px;
+  color:#444;
+  white-space:pre-wrap;
+}
+
+@media print{
+  body *{
+    visibility:hidden;
+  }
+
+  .company-print-header,
+  .company-print-header *,
+  .print-area,
+  .print-area *{
+    visibility:visible;
+  }
+
+  .company-print-header{
+    display:block !important;
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    background:white;
+    padding:15px 20px;
+    z-index:999;
+  }
+
+  .print-area{
+    position:absolute;
+    left:0;
+    top:120px;
+    width:100%;
+    display:block;
+  }
+}
+
+/* =====================================
+   UNIT POPUP
+===================================== */
+
+.unit-box{
+  position:relative;
+  width:100%;
+}
+
+.unit-top{
+  display:flex;
+}
+
+.unit-top input{
+  border-radius:5px 0 0 5px;
+}
+
+.unit-btn{
+  width:50px;
+  border-radius:0 5px 5px 0;
+}
+
+.unit-popup{
+  display:none;
+  position:absolute;
+  top:55px;
+  left:0;
+  width:100%;
+  background:white;
+  border:1px solid #ddd;
+  border-radius:10px;
+  padding:15px;
+  z-index:1000;
+  box-shadow:0 5px 10px rgba(0,0,0,0.2);
+}
+
+.unit-list{
+  max-height:200px;
+  overflow:auto;
+  margin-top:10px;
+  margin-bottom:15px;
+}
+
+.unit-list label{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px;
+  border-bottom:1px solid #eee;
+}
+
+.unit-list input{
+  width:auto;
+}
+
+.new-unit-form{
+  display:flex;
+  gap:10px;
+}
+
+/* =====================================
+   REPORT SECTION
+===================================== */
+
+.total-box{
+  margin-top:20px;
+  font-size:18px;
+  font-weight:bold;
+  color:#111827;
+}
+
+.report-buttons{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+
+/* =====================================
+   PRINT
+===================================== */
+
+.print-area{
+  display:none;
+}
+
+@media print{
+
+  body *{
+    visibility:hidden;
+  }
+
+  .company-print-header,
+  .company-print-header *,
+  .print-area,
+  .print-area *{
+    visibility:visible;
+  }
+
+  .company-print-header{
+    display:block !important;
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    background:white;
+    padding:15px 20px;
+    z-index:999;
+  }
+
+  .print-area{
+    position:absolute;
+    left:0;
+    top:140px;
+    width:100%;
+    display:block;
+  }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="company-print-header" id="companyPrintHeader"></div>
+
+<div class="container">
+
+  <!-- <div class="server-status" id="serverConnectionStatus">ðŸ”„ Checking Server...</div> -->
+
+  <!-- PRODUCT FORM -->
+
+  <!-- =====================================
+       PRODUCT FORM
+  ===================================== -->
+
+  <div class="card">
+
+    <h1>
+      Product Management
+    </h1>
+
+    <div class="form-grid">
+
+      <!-- DATE -->
+
+      <input
+        type="date"
+        id="productDate"
+      >
+
+      <!-- PRODUCT -->
+
+      <input
+        type="text"
+        id="productName"
+        placeholder="Product Name"
+      >
+
+      <!-- UNIT -->
+
+      <div class="unit-box">
+
+        <div class="unit-top">
+
+          <input
+            type="text"
+            id="unit"
+            placeholder="Select Unit"
+            readonly
+            onclick="toggleUnitPopup()"
+          >
+
+          <button
+            type="button"
+            class="unit-btn"
+            onclick="toggleUnitPopup()"
+          >
+           ▼
+          </button>
+
+        </div>
+
+        <!-- POPUP -->
+
+        <div
+          class="unit-popup"
+          id="unitPopup"
+        >
+
+          <!-- SEARCH -->
+
+          <input
+            type="text"
+            id="searchUnit"
+            placeholder="Search Unit"
+            onkeyup="searchUnits()"
+          >
+
+          <!-- UNIT LIST -->
+
+          <div
+            class="unit-list"
+            id="unitList"
+          ></div>
+
+          <!-- ADD UNIT -->
+
+          <div class="new-unit-form">
+
+            <input
+              type="text"
+              id="newUnitName"
+              placeholder="Unit Name"
+            >
+
+            <button
+              class="save-btn"
+              onclick="saveNewUnit()"
+            >
+              Save
+            </button>
+
+            <button
+              class="edit-btn"
+              onclick="editUnitName()"
+            >
+              Edit
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- PURCHASE -->
+
+      <input
+        type="number"
+        id="purchaseRate"
+        placeholder="Purchase Rate"
+      >
+
+      <!-- SALE -->
+
+      <input
+        type="number"
+        id="saleRate"
+        placeholder="Sale Rate"
+      >
+
+      <!-- OPENING -->
+
+      <input
+        type="number"
+        id="openingStock"
+        placeholder="Opening Stock"
+        onkeyup="calculateRemainingStock()"
+      >
+
+      <!-- SOLD -->
+
+      <input
+        type="number"
+        id="soldStock"
+        placeholder="Sold Stock"
+        value="0"
+        onkeyup="calculateRemainingStock()"
+      >
+
+      <!-- REMAINING -->
+
+      <input
+        type="number"
+        id="remainingStock"
+        placeholder="Remaining Stock"
+        readonly
+      >
+
+    </div>
+
+    <!-- BUTTONS -->
+
+    <div class="report-buttons">
+
+      <button
+        class="save-btn"
+        onclick="saveProduct()"
+      >
+        Save Product
+      </button>
+
+      <button
+        class="reset-btn"
+        onclick="resetForm()"
+      >
+        Reset
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- =====================================
+       PRODUCT LIST
+  ===================================== -->
+
+  <div class="card">
+
+    <h2>
+      Product List
+    </h2>
+
+    <!-- SEARCH -->
+
+    <div class="form-grid">
+
+      <input
+        type="text"
+        id="searchProduct"
+        placeholder="Search Product / Unit"
+        onkeyup="searchProducts()"
+      >
+
+      <input
+        type="date"
+        id="fromDate"
+      >
+
+      <input
+        type="date"
+        id="toDate"
+      >
+
+      <select id="todayOption">
+
+        <option value="">
+          Select Option
+        </option>
+
+        <option value="today">
+          Today
+        </option>
+
+      </select>
+
+      <button
+        class="generate-btn"
+        onclick="generateReport()"
+      >
+        Generate
+      </button>
+
+      <button
+        class="print-btn"
+        onclick="printProductList()"
+      >
+        Print List
+      </button>
+
+    </div>
+
+    <!-- TABLE -->
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>ID</th>
+          <th>Date</th>
+          <th>Product</th>
+          <th>Unit</th>
+          <th>Purchase Rate</th>
+          <th>Sale Rate</th>
+          <th>Opening</th>
+          <th>Sold</th>
+          <th>Remaining</th>
+          <th>Unit Total</th>
+          <th>Action</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody id="productTable"></tbody>
+
+    </table>
+
+    <!-- TOTAL -->
+
+    <div
+      class="total-box"
+      id="totalBox"
+    >
+      Total Products : 0
+    </div>
+
+  </div>
+
+</div>
+
+<!-- PRINT -->
+
+<div
+  class="print-area"
+  id="printArea"
+></div>
+
+<script>
+
+/* =====================================
+   STORAGE
+===================================== */
+
+let products =
+JSON.parse(
+  localStorage.getItem(
+    "products"
+  )
+) || [];
+
+let units =
+JSON.parse(
+  localStorage.getItem(
+    "units"
+  )
+) || [
+
+  "Packet",
+  "Piece",
+  "Kg",
+  "Box",
+  "Carton"
+
+];
+
+let editIndex = -1;
+
+/* =====================================
+   LOAD UNITS
+===================================== */
+
+function loadUnits(){
+
+  let unitList =
+    document.getElementById(
+      "unitList"
+    );
+
+  unitList.innerHTML = "";
+
+  units.forEach(unit=>{
+
+    unitList.innerHTML += `
+
+      <label>
+
+        <input
+          type="checkbox"
+          value="${unit}"
+          onchange="selectUnit(this)"
+        >
+
+        ${unit}
+
+      </label>
+
+    `;
+
+  });
+
+}
+
+/* =====================================
+   TOGGLE POPUP
+===================================== */
+
+function toggleUnitPopup(){
+
+  let popup =
+    document.getElementById(
+      "unitPopup"
+    );
+
+  if(
+    popup.style.display === "block"
+  ){
+
+    popup.style.display = "none";
+
+  }else{
+
+    popup.style.display = "block";
+
+  }
+
+}
+
+/* =====================================
+   SELECT UNIT
+===================================== */
+
+function selectUnit(element){
+
+  let boxes =
+    document.querySelectorAll(
+      "#unitList input[type='checkbox']"
+    );
+
+  boxes.forEach(box=>{
+
+    if(box !== element){
+
+      box.checked = false;
+
+    }
+
+  });
+
+  if(element.checked){
+
+    document.getElementById(
+      "unit"
+    ).value = element.value;
+
+  }else{
+
+    document.getElementById(
+      "unit"
+    ).value = "";
+
+  }
+
+}
+
+/* =====================================
+   SEARCH UNITS
+===================================== */
+
+function searchUnits(){
+
+  let value =
+    document.getElementById(
+      "searchUnit"
+    )
+    .value
+    .toLowerCase();
+
+  let labels =
+    document.querySelectorAll(
+      "#unitList label"
+    );
+
+  labels.forEach(label=>{
+
+    let text =
+      label.innerText.toLowerCase();
+
+    if(text.includes(value)){
+
+      label.style.display = "flex";
+
+    }else{
+
+      label.style.display = "none";
+
+    }
+
+  });
+
+}
+
+/* =====================================
+   SAVE UNIT
+===================================== */
+
+function saveNewUnit(){
+
+  let newUnit =
+    document.getElementById(
+      "newUnitName"
+    )
+    .value
+    .trim();
+
+  if(newUnit === ""){
+
+    alert("Enter Unit Name");
+
+    return;
+
+  }
+
+  if(units.includes(newUnit)){
+
+    alert("Unit Already Exists");
+
+    return;
+
+  }
+
+  units.push(newUnit);
+
+  localStorage.setItem(
+    "units",
+    JSON.stringify(units)
+  );
+
+  loadUnits();
+
+  document.getElementById(
+    "newUnitName"
+  ).value = "";
+
+}
+
+/* =====================================
+   EDIT UNIT
+===================================== */
+
+function editUnitName(){
+
+  let selectedUnit =
+    document.getElementById(
+      "unit"
+    ).value;
+
+  let newName =
+    document.getElementById(
+      "newUnitName"
+    ).value;
+
+  if(
+    selectedUnit === "" ||
+    newName === ""
+  ){
+
+    alert(
+      "Select Unit And Enter New Name"
+    );
+
+    return;
+
+  }
+
+  let index =
+    units.indexOf(selectedUnit);
+
+  if(index !== -1){
+
+    units[index] = newName;
+
+  }
+
+  localStorage.setItem(
+    "units",
+    JSON.stringify(units)
+  );
+
+  loadUnits();
+
+  document.getElementById(
+    "unit"
+  ).value = newName;
+
+  document.getElementById(
+    "newUnitName"
+  ).value = "";
+
+}
+
+/* =====================================
+   CALCULATE STOCK
+===================================== */
+
+function calculateRemainingStock(){
+
+  let opening =
+    Number(
+      document.getElementById(
+        "openingStock"
+      ).value
+    );
+
+  let sold =
+    Number(
+      document.getElementById(
+        "soldStock"
+      ).value
+    );
+
+  document.getElementById(
+    "remainingStock"
+  ).value = opening - sold;
+
+}
+
+/* =====================================
+   SAVE PRODUCT
+===================================== */
+
+function saveProduct(){
+
+  let product = {
+
+    date:
+      document.getElementById(
+        "productDate"
+      ).value,
+
+    productName:
+      document.getElementById(
+        "productName"
+      ).value,
+
+    unit:
+      document.getElementById(
+        "unit"
+      ).value,
+
+    purchaseRate:
+      document.getElementById(
+        "purchaseRate"
+      ).value,
+
+    saleRate:
+      document.getElementById(
+        "saleRate"
+      ).value,
+
+    openingStock:
+      document.getElementById(
+        "openingStock"
+      ).value,
+
+    soldStock:
+      document.getElementById(
+        "soldStock"
+      ).value,
+
+    remainingStock:
+      document.getElementById(
+        "remainingStock"
+      ).value
+
+  };
+
+  if(
+    product.productName === "" ||
+    product.unit === ""
+  ){
+
+    alert("Fill All Fields");
+
+    return;
+
+  }
+
+  if(editIndex === -1){
+
+    products.push(product);
+
+  }else{
+
+    products[editIndex] = product;
+
+    editIndex = -1;
+
+  }
+
+  localStorage.setItem(
+    "products",
+    JSON.stringify(products)
+  );
+
+  // Auto-sync to server
+  DBConnector.saveData(product, 'product');
+
+  displayProducts();
+
+  resetForm();
+
+}
+
+/* =====================================
+   DISPLAY PRODUCTS
+===================================== */
+
+function displayProducts(data = products){
+
+  let table =
+    document.getElementById(
+      "productTable"
+    );
+
+  table.innerHTML = "";
+
+  let totalQty = 0;
+
+  let unitTotals = {};
+
+  if(data.length === 0){
+
+    table.innerHTML = `
+
+      <tr>
+
+        <td
+          colspan="11"
+          class="no-data"
+        >
+
+          No Product Found
+
+        </td>
+
+      </tr>
+
+    `;
+
+    return;
+
+  }
+
+  data.forEach((product,index)=>{
+
+    let remaining =
+      Number(
+        product.remainingStock || 0
+      );
+
+    totalQty += remaining;
+
+    if(!unitTotals[product.unit]){
+
+      unitTotals[product.unit] = 0;
+
+    }
+
+    unitTotals[product.unit] += remaining;
+
+    let stockClass =
+
+      remaining > 0
+      ? "stock-green"
+      : "stock-red";
+
+    table.innerHTML += `
+
+      <tr>
+
+        <td>${index + 1}</td>
+
+        <td>${product.date}</td>
+
+        <td>${product.productName}</td>
+
+        <td>${product.unit}</td>
+
+        <td>${product.purchaseRate}</td>
+
+        <td>${product.saleRate}</td>
+
+        <td>${product.openingStock}</td>
+
+        <td>${product.soldStock}</td>
+
+        <td class="${stockClass}">
+          ${remaining}
+        </td>
+
+        <td>
+          ${remaining}
+          ${product.unit}
+        </td>
+
+        <td>
+
+          <button
+            class="edit-btn"
+            onclick="editProduct(${index})"
+          >
+            Edit
+          </button>
+
+          <button
+            class="delete-btn"
+            onclick="deleteProduct(${index})"
+          >
+            Delete
+          </button>
+
+        </td>
+
+      </tr>
+
+    `;
+
+  });
+
+  let totalText =
+    "Total Quantity : " +
+    totalQty;
+
+  for(let unit in unitTotals){
+
+    totalText +=
+      " | " +
+      unitTotals[unit] +
+      " " +
+      unit;
+
+  }
+
+  document.getElementById(
+    "totalBox"
+  ).innerText = totalText;
+
+}
+
+/* =====================================
+   EDIT PRODUCT
+===================================== */
+
+function editProduct(index){
+
+  let product =
+    products[index];
+
+  document.getElementById(
+    "productDate"
+  ).value = product.date;
+
+  document.getElementById(
+    "productName"
+  ).value = product.productName;
+
+  document.getElementById(
+    "unit"
+  ).value = product.unit;
+
+  document.getElementById(
+    "purchaseRate"
+  ).value = product.purchaseRate;
+
+  document.getElementById(
+    "saleRate"
+  ).value = product.saleRate;
+
+  document.getElementById(
+    "openingStock"
+  ).value = product.openingStock;
+
+  document.getElementById(
+    "soldStock"
+  ).value = product.soldStock;
+
+  document.getElementById(
+    "remainingStock"
+  ).value = product.remainingStock;
+
+  editIndex = index;
+
+}
+
+/* =====================================
+   DELETE PRODUCT
+===================================== */
+
+function deleteProduct(index){
+
+  if(confirm("Delete Product?")){
+
+    products.splice(index,1);
+
+    localStorage.setItem(
+      "products",
+      JSON.stringify(products)
+    );
+
+    displayProducts();
+
+  }
+
+}
+
+/* =====================================
+   SEARCH
+===================================== */
+
+function searchProducts(){
+
+  let value =
+    document.getElementById(
+      "searchProduct"
+    )
+    .value
+    .toLowerCase();
+
+  let filtered =
+    products.filter(product =>
+
+      product.productName
+      .toLowerCase()
+      .includes(value)
+
+      ||
+
+      product.unit
+      .toLowerCase()
+      .includes(value)
+
+    );
+
+  displayProducts(filtered);
+
+}
+
+/* =====================================
+   DATE FILTER
+===================================== */
+
+function generateReport(){
+
+  let fromDate =
+    document.getElementById(
+      "fromDate"
+    ).value;
+
+  let toDate =
+    document.getElementById(
+      "toDate"
+    ).value;
+
+  let todayOption =
+    document.getElementById(
+      "todayOption"
+    ).value;
+
+  let today =
+    new Date()
+    .toISOString()
+    .split("T")[0];
+
+  let filtered =
+    products.filter(product=>{
+
+      let date =
+        product.date || "";
+
+      if(
+        todayOption === "today" &&
+        date !== today
+      ){
+
+        return false;
+
+      }
+
+      if(
+        fromDate !== "" &&
+        date < fromDate
+      ){
+
+        return false;
+
+      }
+
+      if(
+        toDate !== "" &&
+        date > toDate
+      ){
+
+        return false;
+
+      }
+
+      return true;
+
+    });
+
+  displayProducts(filtered);
+
+}
+
+/* =====================================
+   PRINT
+===================================== */
+
+function printProductList(){
+
+  let rows = "";
+
+  products.forEach((product,index)=>{
+
+    rows += `
+
+      <tr>
+
+        <td>${index + 1}</td>
+
+        <td>${product.date}</td>
+
+        <td>${product.productName}</td>
+
+        <td>${product.unit}</td>
+
+        <td>${product.purchaseRate}</td>
+
+        <td>${product.saleRate}</td>
+
+        <td>${product.openingStock}</td>
+
+        <td>${product.soldStock}</td>
+
+        <td>${product.remainingStock}</td>
+
+      </tr>
+
+    `;
+
+  });
+
+  document.getElementById(
+    "printArea"
+  ).innerHTML = `
+
+    <h1>
+      Product Report
+    </h1>
+
+    <table
+      border="1"
+      width="100%"
+      cellpadding="10"
+      cellspacing="0"
+      style="
+        border-collapse:collapse;
+        margin-top:20px;
+      "
+    >
+
+      <tr>
+
+        <th>ID</th>
+        <th>Date</th>
+        <th>Product</th>
+        <th>Unit</th>
+        <th>Purchase</th>
+        <th>Sale</th>
+        <th>Opening</th>
+        <th>Sold</th>
+        <th>Remaining</th>
+
+      </tr>
+
+      ${rows}
+
+    </table>
+
+  `;
+
+  window.print();
+
+}
+
+/* =====================================
+   RESET
+===================================== */
+
+function resetForm(){
+
+  document.getElementById(
+    "productDate"
+  ).value = "";
+
+  document.getElementById(
+    "productName"
+  ).value = "";
+
+  document.getElementById(
+    "unit"
+  ).value = "";
+
+  document.getElementById(
+    "purchaseRate"
+  ).value = "";
+
+  document.getElementById(
+    "saleRate"
+  ).value = "";
+
+  document.getElementById(
+    "openingStock"
+  ).value = "";
+
+  document.getElementById(
+    "soldStock"
+  ).value = 0;
+
+  document.getElementById(
+    "remainingStock"
+  ).value = "";
+
+  editIndex = -1;
+
+}
+
+/* =====================================
+   PAGE LOAD
+===================================== */
+
+loadUnits();
+
+displayProducts();
+
+
+
+// Add print button to page
+
+
+
+
+// Add print button to page
+if (typeof addPrintButtonToPage !== 'undefined') addPrintButtonToPage('product');
+
+</script>
+
+<script>
+function getCompanyInfoForPrint(){
+  try{return JSON.parse(localStorage.getItem('erp_company_info')||'null')||{}}catch(e){return{}}
+}
+function getCompanyPrintHeaderHtml(){
+  const info=getCompanyInfoForPrint();
+  const logo=info.logoDataUrl?`<img src="${info.logoDataUrl}" alt="Company Logo">`:'';
+  const name=info.companyName?`<div class="company-name">${info.companyName}</div>`:'';
+  const address=info.address?`<div class="company-address">${info.address}</div>`:'';
+  return `<div class="company-print-header-inner"><div class="left">${logo}</div><div class="center">${name}</div><div class="right">${address}</div></div>`;
+}
+function renderCompanyPrintHeader(){
+  const header=document.getElementById('companyPrintHeader');
+  if(header){header.innerHTML=getCompanyPrintHeaderHtml(); header.style.display='none';}
+}
+renderCompanyPrintHeader();
+</script>
+
+<!-- DATABASE SERVER CONNECTOR -->
+<script src="http://localhost:5000/database-connector.js">
+
+// Add print button to page
+
+
+
+
+// Add print button to page
+if (typeof addPrintButtonToPage !== 'undefined') addPrintButtonToPage('product');
+
+</script>
+
+</body>
+</html>
+

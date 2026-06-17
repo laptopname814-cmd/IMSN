@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
+
+<title>
+Advanced Business Reports System
+</title>
+
+<style>
+
+/* =====================================================
+   GLOBAL
+===================================================== */
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial;
+}
+
+body{
+  display:flex;
+  background:#f3f4f6;
+  min-height:100vh;
+}
+
+/* =====================================================
+   SIDEBAR
+===================================================== */
+
+.sidebar{
+  width:270px;
+  background:#111827;
+  color:white;
+  padding:20px;
+  min-height:100vh;
+}
+
+.sidebar h2{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.menu-btn{
+  width:100%;
+  background:#2563eb;
+  color:white;
+  border:none;
+  padding:12px;
+  margin-bottom:10px;
+  border-radius:5px;
+  text-align:left;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.menu-btn:hover{
+  background:#1d4ed8;
+}
+
+.dropdown{
+  display:none;
+  margin-bottom:10px;
+}
+
+.dropdown button{
+  width:100%;
+  background:#1f2937;
+  color:white;
+  border:none;
+  padding:10px;
+  margin-top:5px;
+  border-radius:5px;
+  text-align:left;
+  cursor:pointer;
+}
+
+.dropdown button:hover{
+  background:#374151;
+}
+
+/* =====================================================
+   MAIN
+===================================================== */
+
+.main{
+  flex:1;
+  padding:20px;
+}
+
+/* =====================================================
+   CARD
+===================================================== */
+
+.card{
+  background:white;
+  border-radius:10px;
+  padding:20px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* =====================================================
+   TITLE
+===================================================== */
+
+h1{
+  margin-bottom:20px;
+  color:#111827;
+}
+
+/* =====================================================
+   FILTER GRID
+===================================================== */
+
+.form-grid{
+  display:grid;
+  grid-template-columns:
+  repeat(auto-fit,minmax(220px,1fr));
+  gap:15px;
+  margin-bottom:20px;
+}
+
+/* =====================================================
+   INPUTS
+===================================================== */
+
+input,
+select{
+  width:100%;
+  padding:12px;
+  border:1px solid #ccc;
+  border-radius:5px;
+  outline:none;
+}
+
+input:focus,
+select:focus{
+  border-color:#2563eb;
+}
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+button{
+  cursor:pointer;
+}
+
+.generate-btn{
+  background:green;
+  color:white;
+  border:none;
+  padding:12px;
+  border-radius:5px;
+}
+
+.print-btn{
+  background:#7c3aed;
+  color:white;
+  border:none;
+  padding:12px;
+  border-radius:5px;
+}
+
+.pdf-btn{
+  background:#dc2626;
+  color:white;
+  border:none;
+  padding:12px;
+  border-radius:5px;
+}
+
+/* =====================================================
+   CHECKBOX
+===================================================== */
+
+.checkbox-box{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:#f9fafb;
+  padding:10px;
+  border-radius:5px;
+  border:1px solid #ddd;
+}
+
+.checkbox-box input{
+  width:auto;
+}
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+.search-box{
+  margin-bottom:20px;
+}
+
+.search-box input{
+  width:100%;
+}
+
+/* =====================================================
+   TABLE
+===================================================== */
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+table th,
+table td{
+  border:1px solid #ddd;
+  padding:12px;
+  text-align:left;
+}
+
+table th{
+  background:#111827;
+  color:white;
+}
+
+table tr:nth-child(even){
+  background:#f9fafb;
+}
+
+table tr:hover{
+  background:#eef2ff;
+}
+
+/* =====================================================
+   TOTAL
+===================================================== */
+
+.total-box{
+  margin-top:20px;
+  padding:15px;
+  background:#f3f4f6;
+  border-radius:5px;
+  font-weight:bold;
+  font-size:18px;
+}
+
+.company-print-header {
+  display: none;
+  width: 100%;
+  border-bottom: 2px solid #000;
+  padding: 15px 0;
+  margin-bottom: 15px;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.company-print-header .company-logo {
+  width: 30%;
+  max-width: 140px;
+}
+
+.company-print-header .company-logo img {
+  width: 100%;
+  max-height: 70px;
+  object-fit: contain;
+}
+
+.company-print-header .company-info {
+  width: 40%;
+  text-align: center;
+}
+
+.company-print-header .company-name {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.company-print-header .company-address {
+  width: 30%;
+  text-align: right;
+  font-size: 13px;
+  color: #444;
+}
+
+.company-print-header .company-print-title {
+  font-size: 16px;
+  margin-top: 5px;
+}
+
+@media print{
+
+  .company-print-header {
+    display: flex !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    margin-top: 0;
+    padding: 15px 20px;
+    z-index: 999;
+  }
+
+  .main {
+    margin-top: 80px;
+  }
+
+  .reset-btn,
+  .search-btn,
+  .button-group,
+  .sidebar,
+  .form-grid,
+  .search-box,
+  .no-print{
+    display:none !important;
+  }
+
+  body{
+    background:white;
+  }
+
+  .card{
+    box-shadow:none;
+  }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="company-print-header" id="companyPrintHeader"></div>
+
+<!-- =====================================================
+     SIDEBAR
+===================================================== -->
+
+<div class="sidebar">
+
+  <h2>
+    Reports
+  </h2>
+
+  <!-- PURCHASE -->
+
+  <button
+    class="menu-btn"
+    onclick="toggleMenu('purchaseMenu')"
+  >
+    Purchase Reports
+  </button>
+
+  <div
+    class="dropdown"
+    id="purchaseMenu"
+  >
+
+    <button
+      onclick="loadReport('purchaseIn')"
+    >
+      Purchase In
+    </button>
+
+    <button
+      onclick="loadReport('purchaseOut')"
+    >
+      Purchase Out
+    </button>
+
+    <button
+      onclick="loadReport('purchaseSummary')"
+    >
+      Purchase Product Summary
+    </button>
+
+  </div>
+
+  <!-- SALES -->
+
+  <button
+    class="menu-btn"
+    onclick="toggleMenu('salesMenu')"
+  >
+    Sales Reports
+  </button>
+
+  <div
+    class="dropdown"
+    id="salesMenu"
+  >
+
+    <button
+      onclick="loadReport('salesIn')"
+    >
+      Sales In
+    </button>
+
+    <button
+      onclick="loadReport('salesOut')"
+    >
+      Sales Out
+    </button>
+
+  </div>
+
+  <!-- OTHER -->
+
+  <button
+    class="menu-btn"
+    onclick="loadReport('stock')"
+  >
+    Stock Report
+  </button>
+
+  <button
+    class="menu-btn"
+    onclick="loadReport('ledger')"
+  >
+    Account Ledger
+  </button>
+
+  <button
+    class="menu-btn"
+    onclick="loadReport('invoice')"
+  >
+    Invoice Report
+  </button>
+
+  <button
+    class="menu-btn"
+    onclick="loadReport('topSelling')"
+  >
+    Top Selling
+  </button>
+
+  <button
+    class="menu-btn"
+    onclick="loadReport('customerSummary')"
+  >
+    Customer Product Quantity Summary
+  </button>
+
+</div>
+
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
+<div class="main">
+
+  <div class="card">
+
+    <h1 id="reportTitle">
+      Advanced Reports System
+    </h1>
+
+    <!-- =====================================================
+         FILTERS
+    ===================================================== -->
+
+    <div class="form-grid">
+
+      <!-- FROM DATE -->
+
+      <input
+        type="date"
+        id="fromDate"
+      >
+
+      <!-- TO DATE -->
+
+      <input
+        type="date"
+        id="toDate"
+      >
+
+      <!-- TODAY OPTION -->
+
+      <select id="todayFilter">
+
+        <option value="">
+          Today Option
+        </option>
+
+        <option value="today">
+          Today
+        </option>
+
+      </select>
+
+      <!-- CUSTOMER -->
+
+      <div
+        id="customerFilterBox"
+        style="display:none;"
+      >
+
+        <select id="customerFilter">
+
+          <option value="">
+            All Customers
+          </option>
+
+        </select>
+
+      </div>
+
+      <!-- SUB CUSTOMER -->
+
+      <div
+        id="subCustomerBox"
+        class="checkbox-box"
+        style="display:none;"
+      >
+
+        <input
+          type="checkbox"
+          id="showSubCustomer"
+        >
+
+        <label>
+          Show Sub Customer
+        </label>
+
+      </div>
+
+      <!-- PRODUCT -->
+
+      <input
+        type="text"
+        id="productFilter"
+        placeholder="Search Product"
+      >
+
+      <!-- GENERATE -->
+
+      <button
+        class="generate-btn"
+        onclick="generateReport()"
+      >
+        Generate
+      </button>
+
+      <!-- PRINT -->
+
+      <button
+        class="print-btn"
+        onclick="printReport()"
+      >
+        Print
+      </button>
+
+      <!-- PDF -->
+
+      <button
+        class="pdf-btn"
+        onclick="downloadPDF()"
+      >
+        PDF
+      </button>
+
+    </div>
+
+    <!-- =====================================================
+         SEARCH
+    ===================================================== -->
+
+    <div class="search-box">
+
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Search Report"
+        onkeyup="searchReport()"
+      >
+
+    </div>
+
+    <!-- =====================================================
+         TABLE
+    ===================================================== -->
+
+    <table>
+
+      <thead id="tableHead">
+
+      </thead>
+
+      <tbody id="reportTable">
+
+      </tbody>
+
+    </table>
+
+    <!-- =====================================================
+         TOTAL
+    ===================================================== -->
+
+    <div
+      class="total-box"
+      id="totalBox"
+    >
+
+      Total Qty : 0
+      <br>
+      Total Amount : 0
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
+<script>
+
+/* =====================================================
+   STORAGE
+===================================================== */
+
+let products =
+JSON.parse(
+  localStorage.getItem(
+    "products"
+  )
+) || [];
+
+let purchaseInvoices =
+JSON.parse(
+  localStorage.getItem(
+    "purchaseInvoices"
+  )
+) || [];
+
+let salesInvoices =
+JSON.parse(
+  localStorage.getItem(
+    "salesInvoices"
+  )
+) || [];
+let purchasePaymentVouchers =
+JSON.parse(
+  localStorage.getItem(
+    "purchasePaymentVouchers"
+  )
+) || [];
+
+let customerPaymentVouchers =
+JSON.parse(
+  localStorage.getItem(
+    "customerPaymentVouchers"
+  )
+) || [];
+
+let purchaseLedger =
+JSON.parse(
+  localStorage.getItem(
+    "purchaseLedger"
+  )
+) || [];
+
+let creditPurchaseVouchers =
+JSON.parse(
+  localStorage.getItem(
+    "creditPurchaseVouchers"
+  )
+) || [];
+
+let creditCustomerVouchers =
+JSON.parse(
+  localStorage.getItem(
+    "creditCustomerVouchers"
+  )
+) || [];
+
+let customersLocal =
+JSON.parse(
+  localStorage.getItem(
+    "customers"
+  )
+) || [];
+/* =====================================================
+   DEMO DATA
+===================================================== */
+
+if(products.length === 0){
+
+  products = [
+
+    {
+      name:"Biscuits",
+      unit:"Packet",
+      openingStock:100,
+      soldStock:20,
+      remainingStock:80
+    },
+
+    {
+      name:"Juice",
+      unit:"Box",
+      openingStock:50,
+      soldStock:10,
+      remainingStock:40
+    }
+
+  ];
+
+}
+
+if(purchaseInvoices.length === 0){
+
+  purchaseInvoices = [
+
+    {
+
+      supplier:"Ali Traders",
+
+      invoiceDate:"2026-05-23",
+
+      netAmount:10000,
+
+      items:[
+
+        {
+          itemName:"Biscuits",
+          qty:20,
+          unit:"Packet",
+          total:4000
+        },
+
+        {
+          itemName:"Juice",
+          qty:10,
+          unit:"Box",
+          total:6000
+        }
+
+      ]
+
+    }
+
+  ];
+
+}
+
+if(salesInvoices.length === 0){
+
+  salesInvoices = [
+
+    {
+
+      customer:"Ahmed",
+
+      subCustomer:"Ahmed Store",
+
+      invoiceNo:"INV-001",
+
+      invoiceDate:"2026-05-23",
+
+      grandTotal:7000,
+
+      items:[
+
+        {
+          itemName:"Biscuits",
+          qty:10,
+          unit:"Packet",
+          total:3000
+        },
+
+        {
+          itemName:"Juice",
+          qty:5,
+          unit:"Box",
+          total:4000
+        }
+
+      ]
+
+    }
+
+  ];
+
+}
+
+/* =====================================================
+   CURRENT REPORT
+===================================================== */
+
+let currentReport =
+"purchaseSummary";
+
+/* =====================================================
+   TOGGLE MENU
+===================================================== */
+
+function toggleMenu(id){
+
+  let menu =
+    document.getElementById(id);
+
+  if(menu.style.display === "block"){
+
+    menu.style.display = "none";
+
+  }else{
+
+    menu.style.display = "block";
+
+  }
+
+}
+
+/* =====================================================
+   LOAD CUSTOMERS
+===================================================== */
+
+function loadCustomers(){
+
+  let select =
+    document.getElementById(
+      "customerFilter"
+    );
+
+  select.innerHTML = `
+
+    <option value="">
+      All Customers
+    </option>
+
+  `;
+
+  let customers = [];
+
+  salesInvoices.forEach(invoice=>{
+
+    if(
+      invoice.customer &&
+      !customers.includes(
+        invoice.customer
+      )
+    ){
+
+      customers.push(
+        invoice.customer
+      );
+
+    }
+
+  });
+
+  customers.forEach(customer=>{
+
+    select.innerHTML += `
+
+      <option value="${customer}">
+        ${customer}
+      </option>
+
+    `;
+
+  });
+
+}
+
+/* =====================================================
+   LOAD REPORT
+===================================================== */
+
+function loadReport(type){
+
+  currentReport = type;
+
+  document.getElementById(
+    "reportTitle"
+  ).innerText = type;
+
+  showCustomerOptions();
+
+  generateReport();
+
+}
+
+/* =====================================================
+   SHOW CUSTOMER FILTERS
+===================================================== */
+
+function showCustomerOptions(){
+
+  let reports = [
+
+    "salesIn",
+    "salesOut",
+    "invoice",
+    "topSelling",
+    "customerSummary"
+
+  ];
+
+  if(
+    reports.includes(currentReport)
+  ){
+
+    document.getElementById(
+      "customerFilterBox"
+    ).style.display = "block";
+
+    document.getElementById(
+      "subCustomerBox"
+    ).style.display = "flex";
+
+  }else{
+
+    document.getElementById(
+      "customerFilterBox"
+    ).style.display = "none";
+
+    document.getElementById(
+      "subCustomerBox"
+    ).style.display = "none";
+
+  }
+
+}
+
+/* =====================================================
+   GENERATE REPORT
+===================================================== */
+
+function generateReport(){
+
+  let table =
+    document.getElementById(
+      "reportTable"
+    );
+
+  let head =
+    document.getElementById(
+      "tableHead"
+    );
+
+  table.innerHTML = "";
+
+  let totalQty = 0;
+
+  let totalAmount = 0;
+
+  let id = 1;
+  const customerFilter =
+    document.getElementById(
+      "customerFilter"
+    ).value.toLowerCase();
+
+  const productFilter =
+    document.getElementById(
+      "productFilter"
+    ).value.toLowerCase();
+
+  const showSubCustomer =
+    document.getElementById(
+      "showSubCustomer"
+    ).checked;
+
+  const fromDate =
+    document.getElementById(
+      "fromDate"
+    ).value;
+
+  const toDate =
+    document.getElementById(
+      "toDate"
+    ).value;
+
+  const todayFilter =
+    document.getElementById(
+      "todayFilter"
+    ).value;
+
+  const dateMatches = date => {
+    if(!date) return true;
+    if(todayFilter === "today"){
+      const today =
+        new Date()
+          .toISOString()
+          .slice(0,10);
+      return date === today;
+    }
+    if(fromDate && date < fromDate) return false;
+    if(toDate && date > toDate) return false;
+    return true;
+  };
+
+  const itemMatches = item => {
+    if(!productFilter) return true;
+    return (
+      (item.itemName || "")
+        .toLowerCase()
+        .includes(productFilter)
+    );
+  };
+
+  const customerMatches = name => {
+    if(!customerFilter) return true;
+    return (
+      (name || "")
+        .toLowerCase()
+        .includes(customerFilter)
+    );
+  };
+
+  const rows = [];
+
+  if(currentReport === "purchaseIn"){
+
+    head.innerHTML = `
+
+      <tr>
+
+        <th>ID</th>
+        <th>Invoice No</th>
+        <th>Supplier</th>
+        <th>Date</th>
+        <th>Items</th>
+        <th>Qty</th>
+        <th>Amount</th>
+
+      </tr>
+
+    `;
+
+    purchaseInvoices.forEach(invoice => {
+      if(!dateMatches(invoice.invoiceDate)) return;
+      const hasProduct =
+        !productFilter ||
+        invoice.items.some(itemMatches);
+      if(!hasProduct) return;
+      const qty = invoice.items.reduce(
+        (sum, item) =>
+          sum + Number(item.qty || 0),
+        0
+      );
+      totalQty += qty;
+      totalAmount += Number(invoice.netAmount || 0);
+      table.innerHTML += `
+
+        <tr>
+
+          <td>${id++}</td>
+          <td>${invoice.invoiceNo || "-"}</td>
+          <td>${invoice.supplier || "-"}</td>
+          <td>${invoice.invoiceDate || "-"}</td>
+          <td>${invoice.items.length}</td>
+          <td>${qty}</td>
+          <td>${invoice.netAmount || 0}</td>
+
+        </tr>
+
+      `;
+    });
+
+  }
+
+  if(currentReport === "purchaseOut"){
+
+    head.innerHTML = `
+
+      <tr>
+
+        <th>ID</th>
+        <th>Date</th>
+        <th>Reference</th>
+        <th>Supplier</th>
+        <th>Account</th>
+        <th>Amount</th>
+        <th>Type</th>
+
+      </tr>
+
+    `;
+
+    purchasePaymentVouchers.forEach(voucher => {
+      if(!dateMatches(voucher.date)) return;
+      if(!customerMatches(voucher.supplier)) return;
+      totalAmount += Number(voucher.amount || 0);
+      table.innerHTML += `
+
+        <tr>
+
+          <td>${id++}</td>
+          <td>${voucher.date || "-"}</td>
+          <td>${voucher.voucherNo || "-"}</td>
+          <td>${voucher.supplier || "-"}</td>
+          <td>${voucher.account || "-"}</td>
+          <td>${voucher.amount || 0}</td>
+          <td>Purchase Payment</td>
+
+        </tr>
+
+      `;
+    });
+
+    creditPurchaseVouchers.forEach(voucher => {
+      if(!dateMatches(voucher.date)) return;
+      if(!customerMatches(voucher.supplier)) return;
+      totalAmount += Number(voucher.amount || 0);
+      table.innerHTML += `
+
+        <tr>
+
+          <td>${id++}</td>
+          <td>${voucher.date || "-"}</td>
+          <td>${voucher.voucherNo || "-"}</td>
+          <td>${voucher.supplier || "-"}</td>
+          <td>${voucher.account || "-"}</td>
+          <td>${voucher.amount || 0}</td>
+          <td>Credit Purchase</td>
+
+        </tr>
+
+      `;
+    });
+
+    purchaseLedger.forEach(entry => {
+      if(!dateMatches(entry.date)) return;
+      if(!customerMatches(entry.name)) return;
+      totalAmount += Number(entry.amount || 0);
+      table.innerHTML += `
+
+        <tr>
+
+          <td>${id++}</td>
+          <td>${entry.date || "-"}</td>
+          <td>${entry.voucher || entry.invoice || "-"}</td>
+          <td>${entry.name || "-"}</td>
+          <td>${entry.voucher ? "" : "Ledger"}</td>
+          <td>${entry.amount || 0}</td>
+          <td>Purchase Ledger</td>
+
+        </tr>
+
+      `;
+    });
+
+  }
+
+  if(currentReport === "purchaseSummary"){
+
+    head.innerHTML = `
+
+      <tr>
+
+        <th>ID</th>
+        <th>Supplier</th>
+        <th>Product</th>
+        <th>Date</th>
+        <th>Qty</th>
+        <th>Unit</th>
+        <th>Amount</th>
+
+      </tr>
+
+    `;
+
+    purchaseInvoices.forEach(invoice=>{
+      if(!dateMatches(invoice.invoiceDate)) return;
+      invoice.items.forEach(item=>{
+        if(!itemMatches(item)) return;
+        totalQty += Number(item.qty || 0);
+        totalAmount += Number(item.total || 0);
+        table.innerHTML += `
+
+          <tr>
+
+            <td>${id++}</td>
+            <td>${invoice.supplier || "-"}</td>
+            <td>${item.itemName || "-"}</td>
+            <td>${invoice.invoiceDate || "-"}</td>
+            <td>${item.qty || 0}</td>
+            <td>${item.unit || "-"}</td>
+            <td>${item.total || 0}</td>
+
+          </tr>
+
+        `;
+      });
+    });
+
+  }
+
+  if(currentReport === "salesIn"){
+
+    head.innerHTML = `
+
+      <tr>
+
+        <th>ID</th>
+        <th>Invoice No</th>
+        <th>Customer</th>
+        <th>Sub Customer</th>
+        <th>Date</th>
+        <th>Product</th>
+        <th>Qty</th>
+        <th>Amount</th>
+
+      </tr>
+
+    `;
+
+    salesInvoices.forEach(invoice=>{
+      if(!dateMatches(invoice.invoiceDate)) return;
+      if(!customerMatches(invoice.customer)) return;
+      invoice.items.forEach(item=>{
+        if(!itemMatches(item)) return;
+        totalQty += Number(item.qty || 0);
+        totalAmount += Number(item.total || 0);
+        table.innerHTML += `
+
+          <tr>
+
+            <td>${id++}</td>
+            <td>${invoice.invoiceNo || "-"}</td>
+            <td>${invoice.customer || "-"}</td>
+            <td>${showSubCustomer ? (invoice.subCustomer || "-") : "-"}</td>
+            <td>${invoice.invoiceDate || "-"}</td>
+            <td>${item.itemName || "-"}</td>
+            <td>${item.qty || 0}</td>
+            <td>${item.total || 0}</td>
+
+          </tr>
+
+        `;
+      });
+    });
+
+  }
+
+  if(currentReport === "salesOut"){
+
+    head.innerHTML = `
+
+      <tr>
+
+        <th>ID</th>
+        <th>Date</th>
+        <th>Voucher No</th>
+        <th>Customer</th>
+        <th>Sub Customer</th>
+        <th>Account</th>
+        <th>Amount</th>
+
+      </tr>
+
+    `;
+
+    customerPaymentVouchers.forEach(voucher => {
+      if(!dateMatches(voucher.date)) return;
+      if(!customerMatches(voucher.customer)) return;
+      totalAmount += Number(voucher.amount || 0);
+      table.innerHTML += `
+
+        <tr>
+
+          <td>${id++}</td>
+          <td>${voucher.date || "-"}</td>
+          <td>${voucher.voucherNo || "-"}</td>
+          <td>${voucher.customer || "-"}</td>
+          <td>${voucher.subCustomer || "-"}</td>
+          <td>${voucher.account || "-"}</td>
+          <td>${voucher.amount || 0}</td>
+
+        </tr>
+
+      `;
+    });
+
+  }
+
+  if(currentReport === "ledger"){
+
+    head.innerHTML = `
+
+      <tr>
+
+        <th>ID</th>
+        <th>Invoice</th>
+        <th>Voucher</th>
+        <th>Supplier</th>
+        <th>Date</th>
+        <th>Amount</th>
+
+      </tr>
+
+    `;
+
+    purchaseLedger.forEach(entry => {
+      if(!dateMatches(entry.date)) return;
+      if(!customerMatches(entry.name)) return;
+      totalAmount += Number(entry.amount || 0);
+      table.innerHTML += `
+
+        <tr>
+
+          <td>${id++}</td>
+          <td>${entry.invoice || "-"}</td>
+          <td>${entry.voucher || "-"}</td>
+          <td>${entry.name || "-"}</td>
+          <td>${entry.date || "-"}</td>
+          <td>${entry.amount || 0}</td>
+
+        </tr>
+
+      `;
+    });
+
+  }
+
+  if(currentReport === "invoice"){
+
+    head.innerHTML = `
+
+      <tr>
+
+        <th>ID</th>
+        <th>Type</th>
+        <th>Invoice No</th>
+        <th>Party</th>
+        <th>Date</th>
+        <th>Amount</th>
+
+      </tr>
+
+    `;
+
+    purchaseInvoices.forEach(invoice => {
+      if(!dateMatches(invoice.invoiceDate)) return;
+      totalAmount += Number(invoice.netAmount || 0);
+      table.innerHTML += `
+
+        <tr>
+
+          <td>${id++}</td>
+          <td>Purchase</td>
+          <td>${invoice.invoiceNo || "-"}</td>
+          <td>${invoice.supplier || "-"}</td>
+          <td>${invoice.invoiceDate || "-"}</td>
+          <td>${invoice.netAmount || 0}</td>
+
+        </tr>
+
+      `;
+    });
+
+    salesInvoices.forEach(invoice => {
+      if(!dateMatches(invoice.invoiceDate)) return;
+      totalAmount += Number(invoice.grandTotal || invoice.amount || 0);
+      table.innerHTML += `
+
+        <tr>
+
+          <td>${id++}</td>
+          <td>Sales</td>
+          <td>${invoice.invoiceNo || "-"}</td>
+          <td>${invoice.customer || "-"}</td>
+          <td>${invoice.invoiceDate || "-"}</td>
+          <td>${invoice.grandTotal || invoice.amount || 0}</td>
+
+        </tr>
+
+      `;
+    });
+
+  }
+
+  if(currentReport === "topSelling"){
+
+    head.innerHTML = `
+
+      <tr>
+
+        <th>ID</th>
+        <th>Product</th>
+        <th>Total Qty</th>
+        <th>Total Amount</th>
+
+      </tr>
+
+    `;
+
+    const productTotals = {};
+    salesInvoices.forEach(invoice => {
+      if(!dateMatches(invoice.invoiceDate)) return;
+      invoice.items.forEach(item => {
+        if(!itemMatches(item)) return;
+        const name = item.itemName || "-";
+        if(!productTotals[name]) {
+          productTotals[name] = { qty: 0, amount: 0 };
+        }
+        productTotals[name].qty += Number(item.qty || 0);
+        productTotals[name].amount += Number(item.total || 0);
+      });
+    });
+
+    Object.keys(productTotals).forEach(name => {
+      totalQty += productTotals[name].qty;
+      totalAmount += productTotals[name].amount;
+      table.innerHTML += `
+
+        <tr>
+
+          <td>${id++}</td>
+          <td>${name}</td>
+          <td>${productTotals[name].qty}</td>
+          <td>${productTotals[name].amount}</td>
+
+        </tr>
+
+      `;
+    });
+
+  }
+
+  if(currentReport === "customerSummary"){
+
+    head.innerHTML = `
+
+      <tr>
+
+        <th>ID</th>
+        <th>Customer</th>
+        <th>Sub Customer</th>
+        <th>Product</th>
+        <th>Date</th>
+        <th>Qty</th>
+        <th>Unit</th>
+        <th>Amount</th>
+
+      </tr>
+
+    `;
+
+    salesInvoices.forEach(invoice => {
+      if(!dateMatches(invoice.invoiceDate)) return;
+      if(!customerMatches(invoice.customer)) return;
+      invoice.items.forEach(item => {
+        if(!itemMatches(item)) return;
+        totalQty += Number(item.qty || 0);
+        totalAmount += Number(item.total || 0);
+        table.innerHTML += `
+
+          <tr>
+
+            <td>${id++}</td>
+            <td>${invoice.customer || "-"}</td>
+            <td>${showSubCustomer ? (invoice.subCustomer || "-") : "-"}</td>
+            <td>${item.itemName || "-"}</td>
+            <td>${invoice.invoiceDate || "-"}</td>
+            <td>${item.qty || 0}</td>
+            <td>${item.unit || "-"}</td>
+            <td>${item.total || 0}</td>
+
+          </tr>
+
+        `;
+      });
+    });
+
+  }
+
+  if(currentReport === "stock"){
+
+    head.innerHTML = `
+
+      <tr>
+
+        <th>ID</th>
+        <th>Product</th>
+        <th>Opening Stock</th>
+        <th>Sold Stock</th>
+        <th>Remaining Stock</th>
+        <th>Unit</th>
+
+      </tr>
+
+    `;
+
+    products.forEach(product=>{
+
+      table.innerHTML += `
+
+        <tr>
+
+          <td>${id++}</td>
+
+          <td>
+            ${product.name}
+          </td>
+
+          <td>
+            ${product.openingStock}
+          </td>
+
+          <td>
+            ${product.soldStock}
+          </td>
+
+          <td>
+            ${product.remainingStock}
+          </td>
+
+          <td>
+            ${product.unit}
+          </td>
+
+        </tr>
+
+      `;
+
+    });
+
+  }
+
+  document.getElementById(
+    "totalBox"
+  ).innerHTML = `
+
+    Total Qty : ${totalQty}
+    <br>
+    Total Amount : ${totalAmount}
+
+  `;
+
+}
+
+/* =====================================================
+   SEARCH REPORT
+===================================================== */
+
+function searchReport(){
+
+  let value =
+    document.getElementById(
+      "searchInput"
+    )
+    .value
+    .toLowerCase();
+
+  let rows =
+    document.querySelectorAll(
+      "#reportTable tr"
+    );
+
+  rows.forEach(row=>{
+
+    let text =
+      row.innerText.toLowerCase();
+
+    if(text.includes(value)){
+
+      row.style.display = "";
+
+    }else{
+
+      row.style.display = "none";
+
+    }
+
+  });
+
+}
+
+/* =====================================================
+   PRINT
+===================================================== */
+
+function printReport(){
+
+  window.print();
+
+}
+
+/* =====================================================
+   PDF
+===================================================== */
+
+function downloadPDF(){
+
+  window.print();
+
+}
+
+/* =====================================================
+   PAGE LOAD
+===================================================== */
+
+loadCustomers();
+
+showCustomerOptions();
+
+generateReport();
+
+
+
+// Add print button to page
+
+/* COMPANY PRINT HEADER */
+function getCompanyInfoForPrint() {
+  try {
+    return JSON.parse(localStorage.getItem('erp_company_info') || 'null') || {};
+  } catch (error) {
+    return {};
+  }
+}
+
+function getCompanyPrintHeaderHtml() {
+  const info = getCompanyInfoForPrint();
+  const logo = info.logoDataUrl ? `<div class="company-logo"><img src="${info.logoDataUrl}" alt="Company Logo"></div>` : '<div class="company-logo"></div>';
+  const name = info.companyName ? `<div class="company-name">${info.companyName}</div>` : '';
+  const address = info.address ? `<div class="company-address">${info.address}</div>` : '';
+  return `
+    ${logo}
+    <div class="company-info">
+      ${name}
+    </div>
+    ${address}
+  `;
+}
+
+function renderCompanyPrintHeader() {
+  const header = document.getElementById('companyPrintHeader');
+  if (header) {
+    header.innerHTML = getCompanyPrintHeaderHtml();
+  }
+}
+
+renderCompanyPrintHeader();
+
+// Add print button to page
+addPrintButtonToPage('report');
+
+</script>
+
+</body>
+</html>

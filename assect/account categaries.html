@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Account Categories</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#f1f5f9;
+    padding:20px;
+}
+
+.header{
+    background:#1d4ed8;
+    color:white;
+    padding:15px;
+    text-align:center;
+    border-radius:10px;
+    margin-bottom:20px;
+    font-size:28px;
+    font-weight:bold;
+}
+
+.container{
+    display:grid;
+    grid-template-columns:1fr 1fr 2fr;
+    gap:20px;
+}
+
+.card{
+    background:white;
+    border-radius:10px;
+    padding:15px;
+    box-shadow:0 2px 10px rgba(0,0,0,.1);
+}
+
+.card h2{
+    margin-bottom:15px;
+    color:#1d4ed8;
+}
+
+label{
+    display:block;
+    margin-top:10px;
+    margin-bottom:5px;
+    font-weight:bold;
+}
+
+input,
+select{
+    width:100%;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+.button-group{
+    display:flex;
+    gap:10px;
+    margin-top:15px;
+    flex-wrap:wrap;
+}
+
+button{
+    border:none;
+    padding:10px 15px;
+    border-radius:5px;
+    cursor:pointer;
+    color:white;
+}
+
+.save-btn{
+    background:#16a34a;
+}
+
+.reset-btn{
+    background:#64748b;
+}
+
+.edit-btn{
+    background:#f59e0b;
+}
+
+.delete-btn{
+    background:#dc2626;
+}
+
+.clear-btn{
+    background:#7c2d12;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+
+th{
+    background:#1d4ed8;
+    color:white;
+}
+
+th,td{
+    border:1px solid #ddd;
+    padding:10px;
+    text-align:left;
+}
+
+.search-box{
+    margin-bottom:10px;
+}
+
+.table-wrapper{
+    overflow-x:auto;
+}
+
+@media(max-width:900px){
+    .container{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="company-print-header" id="companyPrintHeader"></div>
+
+
+<div class="header">
+    Account Categories Management
+</div>
+
+<div class="container">
+
+    <div class="card">
+        <h2>First Category</h2>
+
+        <label>Category Name</label>
+        <input id="firstCategory">
+
+        <div class="button-group">
+            <button class="save-btn" onclick="addFirstCategory()">Save</button>
+            <button class="reset-btn" onclick="resetFirst()">Reset</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Category</th>
+                    </tr>
+                </thead>
+                <tbody id="firstTable"></tbody>
+            <!-- function getCompanyInfoForPrint(){
+                try{ return JSON.parse(localStorage.getItem('erp_company_info')||'null')||{} }catch(e){ return {} }
+            }
+
+            function getCompanyPrintHeaderHtml(){
+                const info = getCompanyInfoForPrint();
+                const logo = info.logoDataUrl ? `<img src="${info.logoDataUrl}" alt="Company Logo">` : '';
+                const name = info.companyName ? `<div style="font-weight:bold">${info.companyName}</div>` : '';
+                const address = info.address ? `${info.address}` : '';
+                return `<div class="company-print-header-inner"><div class="left">${logo}</div><div class="center">${name}</div><div class="right">${address}</div></div>`;
+            }
+
+            function renderCompanyPrintHeader(){
+                const h = document.getElementById('companyPrintHeader');
+                if(h){ h.innerHTML = getCompanyPrintHeaderHtml(); h.style.display = 'none'; }
+            }
+
+            renderCompanyPrintHeader(); -->
+
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Second Category</h2>
+
+        <label>Parent Category</label>
+        <select id="parentCategory"></select>
+
+        <label>Sub Category</label>
+        <input id="secondCategory">
+
+        <div class="button-group">
+            <button class="save-btn" onclick="addSecondCategory()">Save</button>
+            <button class="reset-btn" onclick="resetSecond()">Reset</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Sub Category</th>
+                    </tr>
+                </thead>
+                <tbody id="secondTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Account Categories List</h2>
+
+        <input
+            class="search-box"
+            id="searchBox"
+            placeholder="Search..."
+            onkeyup="displayMainTable()">
+
+        <div class="button-group">
+            <button class="clear-btn" onclick="clearAllData()">
+                Clear All
+            </button>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>First Category</th>
+                        <th>Second Category</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="mainTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+const FIRST_KEY = "account_first_categories";
+const SECOND_KEY = "account_second_categories";
+
+let firstCategories =
+JSON.parse(localStorage.getItem(FIRST_KEY)) || [];
+
+let secondCategories =
+JSON.parse(localStorage.getItem(SECOND_KEY)) || [];
+
+function saveData(){
+
+    localStorage.setItem(
+        FIRST_KEY,
+        JSON.stringify(firstCategories)
+    );
+
+    localStorage.setItem(
+        SECOND_KEY,
+        JSON.stringify(secondCategories)
+    );
+}
+
+function addFirstCategory(){
+
+    const category =
+    document.getElementById("firstCategory")
+    .value.trim();
+
+    if(category === ""){
+        alert("Enter category");
+        return;
+    }
+
+    if(firstCategories.includes(category)){
+        alert("Category already exists");
+        return;
+    }
+
+    firstCategories.push(category);
+
+    saveData();
+    loadData();
+
+    resetFirst();
+}
+
+function addSecondCategory(){
+
+    const parent =
+    document.getElementById("parentCategory").value;
+
+    const second =
+    document.getElementById("secondCategory")
+    .value.trim();
+
+    if(second === ""){
+        alert("Enter sub category");
+        return;
+    }
+
+    secondCategories.push({
+        parent,
+        second
+    });
+
+    saveData();
+    loadData();
+
+    resetSecond();
+}
+
+function displayFirstCategories(){
+
+    let html = "";
+
+    firstCategories.forEach((cat,index)=>{
+
+        html += `
+        <tr>
+            <td>${index+1}</td>
+            <td>${cat}</td>
+        </tr>`;
+    });
+
+    document.getElementById("firstTable").innerHTML = html;
+}
+
+function updateDropdown(){
+
+    let html = "";
+
+    firstCategories.forEach(cat=>{
+
+        html += `
+        <option value="${cat}">
+            ${cat}
+        </option>`;
+    });
+
+    document.getElementById("parentCategory").innerHTML = html;
+}
+
+function displaySecondCategories(){
+
+    let html = "";
+
+    secondCategories.forEach((row,index)=>{
+
+        html += `
+        <tr>
+            <td>${index+1}</td>
+            <td>${row.second}</td>
+        </tr>`;
+    });
+
+    document.getElementById("secondTable").innerHTML = html;
+}
+
+function displayMainTable(){
+
+    const search =
+    document.getElementById("searchBox")
+    .value.toLowerCase();
+
+    let html = "";
+
+    secondCategories.forEach((row,index)=>{
+
+        if(
+            search &&
+            !row.parent.toLowerCase().includes(search) &&
+            !row.second.toLowerCase().includes(search)
+        ){
+            return;
+        }
+
+        html += `
+        <tr>
+            <td>${index+1}</td>
+            <td>${row.parent}</td>
+            <td>${row.second}</td>
+            <td>
+                <button
+                    class="edit-btn"
+                    onclick="editRow(${index})">
+                    Edit
+                </button>
+
+                <button
+                    class="delete-btn"
+                    onclick="deleteRow(${index})">
+                    Delete
+                </button>
+            </td>
+        </tr>`;
+    });
+
+    document.getElementById("mainTable").innerHTML = html;
+}
+
+function editRow(index){
+
+    const current =
+    secondCategories[index].second;
+
+    const updated =
+    prompt("Edit Category", current);
+
+    if(updated === null) return;
+
+    secondCategories[index].second =
+    updated.trim();
+
+    saveData();
+    loadData();
+}
+
+function deleteRow(index){
+
+    if(!confirm("Delete record?"))
+        return;
+
+    secondCategories.splice(index,1);
+
+    saveData();
+    loadData();
+}
+
+function clearAllData(){
+
+    if(!confirm("Delete all data?"))
+        return;
+
+    localStorage.removeItem(FIRST_KEY);
+    localStorage.removeItem(SECOND_KEY);
+
+    firstCategories = [];
+    secondCategories = [];
+
+    loadData();
+}
+
+function resetFirst(){
+
+    document.getElementById("firstCategory").value = "";
+}
+
+function resetSecond(){
+
+    document.getElementById("secondCategory").value = "";
+
+    document.getElementById("parentCategory").selectedIndex = 0;
+}
+
+function loadData(){
+
+    displayFirstCategories();
+    updateDropdown();
+    displaySecondCategories();
+    displayMainTable();
+}
+
+window.onload = loadData;
+
+</script>
+
+</body>
+</html>
+
